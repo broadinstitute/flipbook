@@ -1,4 +1,4 @@
-# reviewer2
+# reviewer #2
 
 This simple tool starts an image server that lets you quickly flip through images from a local directory using your web browser.
 It optionally shows a customizable form where you can take notes or answer questions about each image or set of images. 
