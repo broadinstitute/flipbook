@@ -28,3 +28,6 @@ python3 -m reviewer2 -d /path/dir-with-images    # if -d not specified, it will 
 open localhost:8080   # in your web browser
 ```
 
+### Misc
+
+![image](https://user-images.githubusercontent.com/6240170/113336811-ebc27f80-92f4-11eb-99c8-a7c01e00267d.png)
