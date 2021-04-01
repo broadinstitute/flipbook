@@ -8,12 +8,11 @@ from reviewer2.image_page import image_page_handler
 
 
 def send_file(path):
-    if path == "favicon.png":
-        stream = pkg_resources.resource_stream('reviewer2', 'favicon.png')
+    if path.startswith("favicon"):
+        stream = pkg_resources.resource_stream('reviewer2', path)
         return Response(stream, mimetype='image/png')
-    else:
-        print(f"path: {path}  full path: {os.path.join(args.directory, path)}")
-        return send_from_directory(args.directory, path, as_attachment=True)
+
+    return send_from_directory(args.directory, path, as_attachment=True)
 
 
 app = Flask(__name__)

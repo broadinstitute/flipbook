@@ -50,8 +50,6 @@ def image_page_handler():
         for key, value in metadata_json.items():
             metadata_html += f"""{key}: {value} <br />"""
 
-    print(metadata_html)
-
     # image files
     image_files_html = ""
     for path in image_files:

@@ -22,7 +22,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=["reviewer2"],
-    package_data={'': ['favicon.png']},
+    package_data={'': ['favicon.png', 'favicon2.png']},
     python_requires=">=3.6",
     license="MIT",
     keywords='curation, NGS, sequencing, STRs, REviewer, read visualization, machine learning',
