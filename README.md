@@ -27,3 +27,15 @@ python3 -m reviewer2 -d /path/dir-with-images    # if -d not specified, it will 
 
 open localhost:8080   # in your web browser
 ```
+
+### Develpoment
+
+To create a local dev instance, run
+
+```
+git clone git@github.com:bw2/reviewer2.git
+
+cd reviewer2
+
+DEBUG=True python3 -m reviewer2 -d /path/dir-with-images  # start dev server
+```
