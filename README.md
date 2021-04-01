@@ -23,7 +23,7 @@ It optionally shows a customizable form where you can take notes or answer quest
 python3 -m pip install reviewer2  
 
 # start server
-python3 -m reviewer2 -d /path/dir-with-images    # if -d not specified, will search current dir
+python3 -m reviewer2 -d /path/dir-with-images    # if -d not specified, it will look for images under the current dir
 
 open localhost:8080   # in your web browser
 ```
