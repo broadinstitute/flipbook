@@ -29,8 +29,8 @@ Also, it optionally shows a customizable form where you can take notes or answer
 # install
 python3 -m pip install reviewer2  
 
-# start server
-python3 -m reviewer2 -d /path/dir-with-images    # if -d not specified, it will look for images under the current dir
+# start server: -x specifies path keyword(s) to exclude   -d specifies top level directory to search for images (if not set, it will search under the current dir)
+python3 -m reviewer2 -x temp -x keyword2 -d /path/dir-with-images  
 
 open localhost:8080   # in your web browser
 ```
