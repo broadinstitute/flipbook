@@ -48,5 +48,5 @@ git clone git@github.com:bw2/reviewer2.git
 cd reviewer2
 
 # start server in debug mode:
-DEBUG=True python3 -m reviewer2 -d /path/dir-with-images  # start dev server
+DEBUG=True python3 -m reviewer2 -d /path/dir-with-images
 ```
