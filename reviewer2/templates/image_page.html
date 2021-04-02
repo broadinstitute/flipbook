@@ -17,86 +17,86 @@
         }
     </style>
 </head>
-<body>
-<div class="ui stackable grid" style="margin-top: 1px">
-    <div class="row">
-        <div class="one wide column"></div>
-        <div class="fourteen wide column">
-            <div class="ui stackable grid">
-                <div class="row">
-                    <div class="one wide column"></div>
-                    <div class="two wide column">
-                        <a href="/"><i class="home icon"></i> &nbsp; page list</a>
-                    </div>
-                    <div class="ten wide column" style="text-align:center">
-                        <b>page #{{i}} of {{last}}: &nbsp; {{dirname}}</b>
-                    </div>
-                    <div class="two wide column">
-                        {% if i > 1 %}
-                            <a href="{{ get_image_page_url(i - 1, last) }}">
+<body style="overflow-x: scroll">
+    <div class="ui stackable grid" style="margin-top: 1px">
+        <div class="row">
+            <div class="one wide column"></div>
+            <div class="fourteen wide column">
+                <div class="ui stackable grid">
+                    <div class="row">
+                        <div class="one wide column"></div>
+                        <div class="two wide column">
+                            {% if i > 1 %}
+                                <a href="{{ get_image_page_url(i - 1, last) }}">
+                                    <i class="arrow left icon"></i> &nbsp; prev
+                                </a>
+                            {% else %}
                                 <i class="arrow left icon"></i> &nbsp; prev
-                            </a>
-                        {% else %}
-                            <i class="arrow left icon"></i> &nbsp; prev
-                        {% endif %}
-                        &nbsp;
-                        {% if i < last %}
-                            <a href="{{ get_image_page_url(i + 1, last) }}">
+                            {% endif %}
+                            &nbsp;
+                            {% if i < last %}
+                                <a href="{{ get_image_page_url(i + 1, last) }}">
+                                    next &nbsp; <i class="arrow right icon"></i>
+                                </a>
+                            {% else %}
                                 next &nbsp; <i class="arrow right icon"></i>
-                            </a>
-                        {% else %}
-                            next &nbsp; <i class="arrow right icon"></i>
-                        {% endif %}
+                            {% endif %}
+                        </div>
+                        <div class="two wide column">
+                            <a href="/"><i class="home icon"></i> &nbsp; page list</a>
+                        </div>
+                        <div class="six wide column" style="text-align:center">
+                            <b>page #{{i}} of {{last}}: &nbsp; {{dirname}}</b>
+                        </div>
+                        <div class="one wide column"></div>
                     </div>
-                    <div class="one wide column"></div>
                 </div>
-            </div>
-            {% if metadata_json|length > 0 %}
-                <hr />
-                {% for key, value in metadata_json.items() %}
-                    <b>{{ key }}</b>: {{ value }} &nbsp;&nbsp;
+                {% if metadata_json|length > 0 %}
+                    <hr />
+                    {% for key, value in metadata_json.items() %}
+                        <b>{{ key }}</b>: {{ value }}<br />
+                    {% endfor %}
+                {% endif %}
+                <br/>
+                {% for image_path in image_paths %}
+                    <hr />
+                    <b>{{ image_path }}</b> <br />
+                    <span><img class="img-default-view" src="/{{ image_path }}" /></span><br />
+                    <br />
                 {% endfor %}
-            {% endif %}
-            <br/>
-            {% for image_path in image_paths %}
-                <hr />
-                <b>{{ image_path }}</b> <br />
-                <span><img class="img-default-view" src="/{{ image_path }}" /></span><br />
                 <br />
-            {% endfor %}
-            <br />
-            <!-- div class="ui form">
-                <div style="display:inline-block; padding-right:15px">Verdict:</div>
-                <div style="display:inline-block" class="inline fields">
-                    <div style="display:inline-block" class="field">
-                        <div class="ui radio checkbox">
-                            <input type="radio" name="q1" checked tabindex="0" class="hidden"><label>ok</label>
+                <!-- div class="ui form">
+                    <div style="display:inline-block; padding-right:15px">Verdict:</div>
+                    <div style="display:inline-block" class="inline fields">
+                        <div style="display:inline-block" class="field">
+                            <div class="ui radio checkbox">
+                                <input type="radio" name="q1" checked tabindex="0" class="hidden"><label>ok</label>
+                            </div>
+                        </div>
+                        <div style="display:inline-block" class="field">
+                            <div class="ui radio checkbox">
+                                <input type="radio" name="q1" checked tabindex="0" class="hidden"><label>nope</label>
+                            </div>
                         </div>
                     </div>
-                    <div style="display:inline-block" class="field">
-                        <div class="ui radio checkbox">
-                            <input type="radio" name="q1" checked tabindex="0" class="hidden"><label>nope</label>
-                        </div>
-                    </div>
-                </div>
-                <div class="ui submit button" onClick="submit_form()">Submit</div>
-            </div -->
+                    <div class="ui submit button" onClick="submit_form()">Submit</div>
+                </div -->
+            </div>
+            <div class="one wide column"></div>
         </div>
-        <div class="one wide column"></div>
     </div>
-</div>
-<script type="text/javascript">
-  $('.ui.radio.checkbox').checkbox();
+    <script type="text/javascript">
+      $('.ui.radio.checkbox').checkbox();
 
-  $('.img-default-view').click((event) => {
-    $(event.target).toggleClass('img-default-view img-zoomed-in-view')
-  })
+      $('.img-default-view').click((event) => {
+        $(event.target).toggleClass('img-default-view img-zoomed-in-view')
+      })
 
-  /*
-  submit_form = () => {
-    console.log('submit')
-  }
-  */
-</script>
+      /*
+      submit_form = () => {
+        console.log('submit')
+      }
+      */
+    </script>
 </body>
 </html>

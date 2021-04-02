@@ -2,7 +2,7 @@ import json
 import os
 from flask import request, Response
 
-from reviewer2 import DIRECTORY_TO_IMAGE_FILES_LIST
+from reviewer2 import DIRECTORY_TO_IMAGE_FILES_LIST, args
 from reviewer2.utils import load_jinja_template, get_image_page_url
 
 IMAGE_PAGE_TEMPLATE = None
@@ -39,7 +39,7 @@ def image_page_handler():
 
     # parse metadata.json if it exists
     metadata_json = {}
-    metadata_path = os.path.join(dirname, "reviewer2_metadata.json")
+    metadata_path = os.path.join(args.directory, dirname, "reviewer2_metadata.json")
     if os.path.isfile(metadata_path):
         try:
             with open(metadata_path, "rt") as f:

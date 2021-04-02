@@ -8,28 +8,28 @@
     <link rel="icon" href="/favicon2.png" type="image/x-icon"/>
     <title>reviewer2</title>
 </head>
-<body>
-<div class="ui stackable grid">
-    <div class="row">
-        <div class="one wide column"></div>
-        <div class="one wide column">
-            <br />
-            For review: <br />
-            <table class='ui stackable table' style='border: none'>
-                {% for page_number, dirname, filenames in table_rows %}
-                    <tr>
-                        <td style="width: 1%">{{ page_number }}.</td>
-                        <td style="width: 1%; padding-right: 100px;">
-                            <a href="{{ get_image_page_url(page_number, table_rows | length) }}">{{dirname}}</a>
-                        </td>
-                        {% if add_num_images_column %}
-                            <td style="width: 1%">{{ filenames | length }} images</td>
-                        {% endif %}
-                    </tr>
-                {% endfor %}
-            </table>
+<body style="overflow-x: scroll">
+    <div class="ui stackable grid">
+        <div class="row">
+            <div class="one wide column"></div>
+            <div class="one wide column">
+                <br />
+                For review: <br />
+                <table class='ui stackable table' style='border: none'>
+                    {% for page_number, dirname, filenames in table_rows %}
+                        <tr>
+                            <td style="width: 1%">{{ page_number }}.</td>
+                            <td style="width: 1%; padding-right: 100px;">
+                                <a href="{{ get_image_page_url(page_number, table_rows | length) }}">{{dirname}}</a>
+                            </td>
+                            {% if add_num_images_column %}
+                                <td style="width: 1%">{{ filenames | length }} images</td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
         </div>
     </div>
-</div>
 </body>
 </html>
