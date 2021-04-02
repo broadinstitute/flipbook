@@ -1,44 +1,26 @@
 from flask import Response
+import os
+
 from reviewer2 import DIRECTORY_TO_IMAGE_FILES_LIST
-from reviewer2.utils import get_page_url, get_html_head
+from reviewer2.utils import load_jinja_template, get_image_page_url
+
+MAIN_LIST_TEMPLATE = None
 
 
 def main_list_handler():
-    add_images_column = any(len(contents) > 1 for _, contents in DIRECTORY_TO_IMAGE_FILES_LIST)
+    global MAIN_LIST_TEMPLATE
+    if MAIN_LIST_TEMPLATE is None or os.environ.get("DEBUG"):
+        MAIN_LIST_TEMPLATE = load_jinja_template("main_list")
 
-    table_rows_html = ""
-    for page_number, (dirname, contents) in enumerate(DIRECTORY_TO_IMAGE_FILES_LIST):
-        page_number += 1
+    add_num_images_column = any(len(filenames) > 1 for _, filenames in DIRECTORY_TO_IMAGE_FILES_LIST)
 
-        table_rows_html += '<tr>'
-        table_rows_html += f'  <td style="width: 1%">{page_number}.</td>'
-        table_rows_html += (f'  <td style="width: 1%; padding-right: 100px;">'
-            f'<a href="{get_page_url(page_number, DIRECTORY_TO_IMAGE_FILES_LIST)}">{dirname}</a>'
-            f'</td>')
-        if add_images_column:
-            table_rows_html += f'<td style="width: 1%">{len(contents)} images</td>'
-        table_rows_html += '</tr>'
+    table_rows = [(page_number + 1, dirname, filenames) for page_number, (dirname, filenames) in enumerate(DIRECTORY_TO_IMAGE_FILES_LIST)]
 
-    html = f"""
-<html>
-{get_html_head()}
-<body>
-    <div class="ui stackable grid">
-        <div class="row">
-            <div class="one wide column"></div>
-            <div class="one wide column">
-                <br />
-                For review: <br />
-
-                <table class='ui stackable table' style='border: none'>
-                    {table_rows_html}
-                </table>
-            </div>
-        </div>
-    </div>
-</body>
-</html>    
-"""
+    html = MAIN_LIST_TEMPLATE.render(
+        table_rows=table_rows,
+        add_num_images_column=add_num_images_column,
+        get_image_page_url=get_image_page_url,
+    )
     return Response(html, mimetype='text/html')
 
 

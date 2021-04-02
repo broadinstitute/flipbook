@@ -3,10 +3,16 @@ import os
 from flask import request, Response
 
 from reviewer2 import DIRECTORY_TO_IMAGE_FILES_LIST
-from reviewer2.utils import get_page_url, get_html_head
+from reviewer2.utils import load_jinja_template, get_image_page_url
+
+IMAGE_PAGE_TEMPLATE = None
 
 
 def image_page_handler():
+    global IMAGE_PAGE_TEMPLATE
+    if IMAGE_PAGE_TEMPLATE is None or os.environ.get("DEBUG"):
+        IMAGE_PAGE_TEMPLATE = load_jinja_template("image_page")
+
     params = {}
     if request.values:
         params.update(request.values)
@@ -29,13 +35,9 @@ def image_page_handler():
     if i < 1 or i > len(DIRECTORY_TO_IMAGE_FILES_LIST):
         i = 1
 
-    dirname, image_files = DIRECTORY_TO_IMAGE_FILES_LIST[i - 1]
+    dirname, image_paths = DIRECTORY_TO_IMAGE_FILES_LIST[i - 1]
 
-    # top of page
-    prev_link = "" if i <= 1 else get_page_url(i - 1, DIRECTORY_TO_IMAGE_FILES_LIST)
-    next_link = "" if i >= last else get_page_url(i + 1, DIRECTORY_TO_IMAGE_FILES_LIST)
-
-    # metadata html
+    # parse metadata.json if it exists
     metadata_json = {}
     metadata_path = os.path.join(dirname, "reviewer2_metadata.json")
     if os.path.isfile(metadata_path):
@@ -45,53 +47,18 @@ def image_page_handler():
         except Exception as e:
             print(f"Unable to parse {metadata_path}: {e}")
 
-    metadata_html = ""
-    if isinstance(metadata_json, dict):
-        for key, value in metadata_json.items():
-            metadata_html += f"""{key}: {value} <br />"""
+    if not isinstance(metadata_json, dict):
+        print(f"WARNING: {metadata_path} doesn't contain a dictionary. Skipping...")
+        metadata_json = {}
 
-    # image files
-    image_files_html = ""
-    for path in image_files:
-        image_files_html += f"""
-   <hr />
-   <b>{path}</b> <br />
-   <img src="/{path}" /><br /><br />     
-"""
+    html = IMAGE_PAGE_TEMPLATE.render(
+        i=i,
+        last=last,
+        dirname=dirname,
+        image_paths=image_paths,
+        metadata_json=metadata_json,
+        get_image_page_url=get_image_page_url,
+    )
 
-    html = f"""
-<html>
-{get_html_head()}
-<body>
-    <div class="ui stackable grid" style="margin-top: 1px">
-        <div class="row">
-            <div class="one wide column"></div>
-            <div class="fourteen wide column">
-                <div class="ui stackable grid">
-                    <div class="row">
-                        <div class="one wide column"></div>
-                        <div class="two wide column">
-                            <a href="/"><i class="home icon"></i> &nbsp; page list</a>
-                        </div>
-                        <div class="ten wide column" style="text-align:center">
-                            <b>{dirname}</b>
-                        </div>
-                        <div class="two wide column">     
-                            <a href="{prev_link}"><i class="arrow left icon"></i> &nbsp; prev</a> 
-                            &nbsp; 
-                            <a href="{next_link}">next &nbsp; <i class="arrow right icon"></i></a>
-                        </div>
-                        <div class="one wide column"></div>
-                    </div>
-                </div>
-                {metadata_html}<br/>
-                {image_files_html}<br />
-            </div>
-            <div class="one wide column"></div>
-        </div>
-    </div>
-</body>
-</html>    
-"""
     return Response(html, mimetype='text/html')
 

@@ -2,16 +2,17 @@ from flask import Flask, Response, send_from_directory
 from flask_cors import CORS
 import os
 import pkg_resources
+from reviewer2.utils import get_image_page_url
+
 from reviewer2 import args
 from reviewer2.main_list import main_list_handler
 from reviewer2.image_page import image_page_handler
 
 
 def send_file(path):
-    print(f"Fetching {args.directory} {path}")
+    print(f"Sending {args.directory} {path}")
     if path.startswith("favicon"):
-        stream = pkg_resources.resource_stream('reviewer2', path)
-        return Response(stream, mimetype='image/png')
+        return Response(pkg_resources.resource_stream('reviewer2', 'icons/favicon.png'), mimetype='image/png')
 
     return send_from_directory(args.directory, path, as_attachment=True)
 

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta content="width=device-width, initial-scale=1" charset="utf-8" name="viewport" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
+    <link rel="icon" href="/favicon2.png" type="image/x-icon"/>
+    <title>reviewer2</title>
+</head>
+<body>
+<div class="ui stackable grid" style="margin-top: 1px">
+    <div class="row">
+        <div class="one wide column"></div>
+        <div class="fourteen wide column">
+            <div class="ui stackable grid">
+                <div class="row">
+                    <div class="one wide column"></div>
+                    <div class="two wide column">
+                        <a href="/"><i class="home icon"></i> &nbsp; page list</a>
+                    </div>
+                    <div class="ten wide column" style="text-align:center">
+                        <b>page #{{i}} of {{last}}: &nbsp; {{dirname}}</b>
+                    </div>
+                    <div class="two wide column">
+                        {% if i > 1 %}
+                            <a href="{{ get_image_page_url(i - 1, last) }}">
+                                <i class="arrow left icon"></i> &nbsp; prev
+                            </a>
+                        {% else %}
+                            <i class="arrow left icon"></i> &nbsp; prev
+                        {% endif %}
+                        &nbsp;
+                        {% if i < last %}
+                            <a href="{{ get_image_page_url(i + 1, last) }}">
+                                next &nbsp; <i class="arrow right icon"></i>
+                            </a>
+                        {% else %}
+                            next &nbsp; <i class="arrow right icon"></i>
+                        {% endif %}
+                    </div>
+                    <div class="one wide column"></div>
+                </div>
+            </div>
+            {% for key, value in metadata_json.items() %}
+                {{ key }}: {{ value }} <br />
+            {% endfor %}
+            <br/>
+            {% for image_path in image_paths %}
+                <hr />
+                <b>{{ image_path }}</b> <br />
+                <img src="/{{ image_path }}" /><br /><br />
+            {% endfor %}
+            <br />
+            <div class="ui form">
+                <div style="display:inline-block; padding-right:15px">Verdict:</div>
+                <div style="display:inline-block" class="inline fields">
+                    <div style="display:inline-block" class="field">
+                        <div class="ui radio checkbox">
+                            <input type="radio" name="q1" checked tabindex="0" class="hidden"><label>ok</label>
+                        </div>
+                    </div>
+                    <div style="display:inline-block" class="field">
+                        <div class="ui radio checkbox">
+                            <input type="radio" name="q1" checked tabindex="0" class="hidden"><label>nope</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui submit button" onClick="submit_form()">Submit</div>
+            </div>
+        </div>
+        <div class="one wide column"></div>
+    </div>
+</div>
+<script type="text/javascript">
+  $('.ui.radio.checkbox').checkbox();
+
+  function submit_form() {
+    console.log('submit')
+  }
+</script>
+</body>
+</html>

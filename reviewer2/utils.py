@@ -1,6 +1,8 @@
 import collections
 import glob
+from jinja2 import Template
 import os
+import pkg_resources
 
 
 def get_directory_to_image_files_list(top_level_dir, keywords_to_exclude):
@@ -28,19 +30,9 @@ def get_directory_to_image_files_list(top_level_dir, keywords_to_exclude):
     return directory_to_image_files_list
 
 
-def get_html_head():
-    return f"""
-<head>
-    <meta content="width=device-width, initial-scale=1" charset="utf-8" name="viewport" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css" />
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
-    <link rel="icon" href="/favicon2.png" type="image/x-icon"/>
-    <title>reviewer2</title>
-</head>
-"""
+def get_image_page_url(page_number, last):
+    return f"/page?last={last}&i={page_number}"
 
 
-def get_page_url(page_number, directory_to_image_files):
-    return f"/page?last={len(directory_to_image_files)}&i={page_number}"
-
+def load_jinja_template(name):
+    return Template(pkg_resources.resource_stream("reviewer2", f"templates/{name}.html").read().decode('UTF-8'))
