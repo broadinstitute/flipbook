@@ -26,13 +26,16 @@ Also, it optionally shows a customizable form where you can take notes or answer
 ### Install and Run:
 
 ```
-# install
+# install:
 python3 -m pip install reviewer2  
 
-# start server: -x specifies path keyword(s) to exclude   -d specifies top level directory to search for images (if not set, it will search under the current dir)
+# start server (optional args: -x, -d,  env-vars: DEBUG, HOST, PORT): 
+#    -x specify image path keyword(s) to exclude from review  
+#    -d specifies top level directory to search for images (if not set, it will search under the current dir)
 python3 -m reviewer2 -x temp -x keyword2 -d /path/dir-with-images  
 
-open localhost:8080   # in your web browser
+# launch web browser
+open localhost:8080
 ```
 
 ### Develpoment:
@@ -44,5 +47,6 @@ git clone git@github.com:bw2/reviewer2.git
 
 cd reviewer2
 
+# start server in debug mode:
 DEBUG=True python3 -m reviewer2 -d /path/dir-with-images  # start dev server
 ```
