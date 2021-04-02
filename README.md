@@ -17,6 +17,12 @@ Also, it optionally shows a customizable form where you can take notes or answer
 - each image page shows the image, an optional customizable form where you can take notes or answer questions about the image, and next/previous page links
 - use subdirectories to group images. Any images found in the same subdirectory will be shown on the same image page. Also, `reviewer2_metadata.json` files can optionally be added to a subdirectory and provide metadata to show at the top of a specific image page.
 
+### TODO - not yet implemented:
+
+- web forms, sqlite db storage
+- global config file (for customizing forms, etc.)
+- keyboard shortcuts
+
 ### Install and Run
 
 ```
