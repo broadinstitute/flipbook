@@ -29,7 +29,7 @@ Also, it optionally shows a customizable form where you can take notes or answer
 # install:
 python3 -m pip install reviewer2  
 
-# start server (optional args: -x, -d,  env-vars:  DEBUG, HOST (is "127.0.0.1" by default), PORT (is "8080" by default)): 
+# start server (optional args: -x, -d,  env-vars:  DEBUG, HOST, PORT): 
 #    -x specify image path keyword(s) to exclude from review  
 #    -d specifies top level directory to search for images (if not set, it will search under the current dir)
 python3 -m reviewer2 -x temp -x keyword2 -d /path/dir-with-images  
