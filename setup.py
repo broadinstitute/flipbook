@@ -1,26 +1,35 @@
 import os
 import sys
-import setuptools
+from setuptools import setup
 
 command = sys.argv[-1]
 if command == 'publish':
-    os.system('python setup.py sdist upload')
+    os.system('rm -rf dist')
+    os.system('python3 setup.py sdist')
+    os.system('python3 setup.py bdist_wheel')
+    os.system('python3 setup.py bdist_wheel')
+    os.system('twine upload dist/*whl dist/*gz')
     sys.exit()
 
-with open("README.md", "r", encoding="utf-8") as fh:
+with open("README.md", "rt") as fh:
     long_description = fh.read()
 
-with open("requirements.txt", "r", encoding="utf-8") as fh:
-    install_requires = [r.strip() for r in fh.readlines()]
+install_requires = [
+    "configargparse",
+    "flask",
+    "flask-cors",
+    "gunicorn",
+    "pandas",
+]
 
-setuptools.setup(
+setup(
     name='reviewer2',
-    version="0.1",
+    version="0.3",
     description="Starts a simple image server that lets you quickly flip through image files from a local directory "
                 "using your web browser and optionally answering customizable questions about each one",
     install_requires=install_requires,
-    long_description=long_description,
     long_description_content_type="text/markdown",
+    long_description=long_description,
     packages=["reviewer2"],
     package_data={'': ['favicon.png', 'favicon2.png']},
     python_requires=">=3.6",

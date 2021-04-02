@@ -8,6 +8,7 @@ from reviewer2.image_page import image_page_handler
 
 
 def send_file(path):
+    print(f"Fetching {args.directory} {path}")
     if path.startswith("favicon"):
         stream = pkg_resources.resource_stream('reviewer2', path)
         return Response(stream, mimetype='image/png')

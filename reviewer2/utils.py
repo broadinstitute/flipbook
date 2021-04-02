@@ -4,8 +4,6 @@ import os
 
 
 def get_directory_to_image_files_list(top_level_dir, keywords_to_exclude):
-    top_level_dir = os.path.realpath(top_level_dir)
-
     image_paths = []
     for suffix in "svg", "png", "jpeg", "jpg":
         glob_string = os.path.join(top_level_dir, f"**/*.{suffix}")

@@ -1,5 +1,0 @@
-configargparse
-flask
-flask-cors
-gunicorn
-pandas
