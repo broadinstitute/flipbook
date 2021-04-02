@@ -23,14 +23,15 @@ install_requires = [
 
 setup(
     name='reviewer2',
-    version="0.4",
+    version="0.5",
     description="Starts a simple image server that lets you quickly flip through image files from a local directory "
                 "using your web browser and optionally answering customizable questions about each one",
     install_requires=install_requires,
     long_description_content_type="text/markdown",
     long_description=long_description,
     packages=["reviewer2"],
-    package_data={'': ['*.png', '*.html']},
+    include_package_data=True,
+    package_data={'': ['*/*.png', '*/*.html']},
     python_requires=">=3.6",
     license="MIT",
     keywords='curation, NGS, sequencing, STRs, REviewer, read visualization, machine learning',
