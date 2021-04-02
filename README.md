@@ -1,3 +1,11 @@
+.. image:: https://img.shields.io/pypi/v/reviewer2.svg?style=flat
+    :alt: PyPI version
+    :target: https://pypi.python.org/pypi/reviewer2
+
+.. image:: https://img.shields.io/pypi/pyversions/reviewer2.svg
+    :alt: Supported Python versions
+    :target: https://pypi.python.org/pypi/reviewer2
+    
 # reviewer #2
 
 This tool starts a simple image server that lets you quickly flip through image files from a local directory using your web browser.
