@@ -2,7 +2,6 @@ from flask import Flask, Response, send_from_directory
 from flask_cors import CORS
 import os
 import pkg_resources
-from reviewer2.utils import get_image_page_url
 
 from reviewer2 import args
 from reviewer2.main_list import main_list_handler

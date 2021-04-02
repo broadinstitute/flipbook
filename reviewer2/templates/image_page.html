@@ -6,7 +6,16 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
     <link rel="icon" href="/favicon2.png" type="image/x-icon"/>
-    <title>reviewer2</title>
+    <title>reviewer2: {{dirname}}</title>
+    <style>
+        .img-default-view {
+            max-width: 100%;
+            cursor: zoom-in;
+        }
+        .img-zoomed-in-view {
+            cursor: zoom-out;
+        }
+    </style>
 </head>
 <body>
 <div class="ui stackable grid" style="margin-top: 1px">
@@ -42,14 +51,18 @@
                     <div class="one wide column"></div>
                 </div>
             </div>
-            {% for key, value in metadata_json.items() %}
-                {{ key }}: {{ value }} <br />
-            {% endfor %}
+            {% if metadata_json|length > 0 %}
+                <hr />
+                {% for key, value in metadata_json.items() %}
+                    <b>{{ key }}</b>: {{ value }} &nbsp;&nbsp;
+                {% endfor %}
+            {% endif %}
             <br/>
             {% for image_path in image_paths %}
                 <hr />
                 <b>{{ image_path }}</b> <br />
-                <img src="/{{ image_path }}" /><br /><br />
+                <span><img class="img-default-view" src="/{{ image_path }}" /></span><br />
+                <br />
             {% endfor %}
             <br />
             <!-- div class="ui form">
@@ -75,9 +88,15 @@
 <script type="text/javascript">
   $('.ui.radio.checkbox').checkbox();
 
-  function submit_form() {
+  $('.img-default-view').click((event) => {
+    $(event.target).toggleClass('img-default-view img-zoomed-in-view')
+  })
+
+  /*
+  submit_form = () => {
     console.log('submit')
   }
+  */
 </script>
 </body>
 </html>
