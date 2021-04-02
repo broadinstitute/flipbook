@@ -19,7 +19,7 @@ Also, it optionally shows a customizable form where you can take notes or answer
 
 ### TODO - not yet implemented:
 
-- web forms, sqlite db storage
+- web forms, export to tsv
 - global config file (for customizing forms, etc.)
 - keyboard shortcuts
 
