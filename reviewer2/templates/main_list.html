@@ -74,9 +74,6 @@
                                     <a id="link{{page_number}}" href="{{ get_image_page_url(page_number, image_files_list | length) }}">
                                         {{relative_directory or filenames[0]}}
                                     </a>
-                                    {% if add_num_images_column %}
-                                        &nbsp; &nbsp; ({{ filenames | length }} images)
-                                    {% endif %}
                                 </td>
                                 {% for column_name in form_column_names %}
                                     <td>
@@ -119,7 +116,7 @@
       //keyboard shortcuts
       $(document).keypress((event) => {
         const key = parseInt(String.fromCharCode(event.keyCode))
-        if (key > 0 && key < 10 && key < parseInt("{{ image_files_list|length }}")) {
+        if (key > 0 && key < 10 && key <= parseInt("{{ image_files_list|length }}")) {
           $("#link" + key)[0].click();
         }
       })

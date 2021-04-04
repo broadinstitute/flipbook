@@ -15,8 +15,6 @@ def main_list_handler():
     if args.verbose:
         print(f"main_list_handler recieved {request.url}")
 
-    add_num_images_column = any(len(filenames) > 1 for _, filenames in RELATIVE_DIRECTORY_TO_IMAGE_FILES_LIST)
-
     image_files_list = [
         (page_number + 1, relative_directory, filenames)
         for page_number, (relative_directory, filenames) in enumerate(RELATIVE_DIRECTORY_TO_IMAGE_FILES_LIST)
@@ -24,7 +22,6 @@ def main_list_handler():
 
     html = MAIN_LIST_TEMPLATE.render(
         image_files_list=image_files_list,
-        add_num_images_column=add_num_images_column,
         get_image_page_url=get_image_page_url,
         form_column_names=FORM_SCHEMA_COLUMNS,
         form_responses_dict=FORM_RESPONSES,
