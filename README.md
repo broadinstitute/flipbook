@@ -30,7 +30,7 @@ python3 -m pip install reviewer2
 python3 -m reviewer2    # start server for all images in the current directory and subdirectories
 ```
 
-Below are more examples. All args are optional. Run it with `--help` to see all args + docs.
+Below are more examples (all args are optional). Run it with `--help` to see all args + docs.
 
 ```
 python3 -m reviewer2 -x temp -x keyword2 -d /path/dir-with-images    #  -x are keyword(s) of paths to skip    -d is the top level dir to search instead of the current dir
