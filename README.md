@@ -28,19 +28,16 @@ python3 -m pip install reviewer2
 
 ```
 python3 -m reviewer2    # start server for all images in the current directory and subdirectories
-
-open http://localhost:8080   # open this url in your web browser to start reviewing images
 ```
 
-Below are more examples. All args are optional. Run it with `--help` to see all args + docs.
+Below are more examples (all args are optional). Run it with `--help` to see the full list of args and descriptions.
 
-*More examples:*
 ```
 python3 -m reviewer2 -x temp -x keyword2 -d /path/dir-with-images    #  -x are keyword(s) of paths to skip    -d is the top level dir to search instead of the current dir
 
-python3 -m reviewer2 -t /path/user_responses.xls    #  change where user responses get saved
+python3 -m reviewer2 -t /path/user_responses.xls    #  change where user responses get saved (default: reviewer2_form_responses.tsv)
 
-python3 -m reviewer2 -m /path/metadata.tsv    #  provide a metadata table 
+python3 -m reviewer2 -m /path/metadata.tsv          #  provide a metadata table 
 ```
 
 After the server is running, open your web browser to [http://localhost:8080](http://localhost:8080) to start reviewing images.
