@@ -17,36 +17,74 @@ Also, it optionally shows a customizable form where you can take notes or answer
 - each image page shows the image, an optional customizable form where you can take notes or answer questions about the image, and next/previous page links
 - use subdirectories to group images. Any images found in the same subdirectory will be shown on the same image page. Also, `reviewer2_metadata.json` files can optionally be added to a subdirectory and provide metadata to show at the top of a specific image page.
 
-### TODO - not yet implemented:
 
-- web forms, export to tsv
-- global config file (for customizing forms, etc.)
-- keyboard shortcuts
-
-### Install and Run:
+### Install:
 
 ```
-# install:
 python3 -m pip install reviewer2  
-
-# start server (optional args: -x, -d,  env-vars:  DEBUG, HOST, PORT): 
-#    -x specify image path keyword(s) to exclude from review  
-#    -d specifies top level directory to search for images (if not set, it will search under the current dir)
-python3 -m reviewer2 -x temp -x keyword2 -d /path/dir-with-images  
-
-# launch web browser
-open localhost:8080
 ```
 
-### Develpoment:
+### Run:
+
+```
+python3 -m reviewer2    # start server for all images in the current directory and subdirectories
+
+open http://localhost:8080   # open this url in your web browser to start reviewing images
+```
+
+Below are more examples. All args are optional. Run it with `--help` to see all args + docs.
+
+*More examples:*
+```
+python3 -m reviewer2 -x temp -x keyword2 -d /path/dir-with-images    #  -x are keyword(s) of paths to skip    -d is the top level dir to search instead of the current dir
+
+python3 -m reviewer2 -t /path/user_responses.xls    #  change where user responses get saved
+
+python3 -m reviewer2 -m /path/metadata.tsv    #  provide a metadata table 
+```
+
+After the server is running, open your web browser to [http://localhost:8080](http://localhost:8080) to start reviewing images.
+
+### Optional Inputs:
+
+- responses table (`-t`)
+
+  As users fill in the forms at the top of the image pages, the responses are written to this table. 
+  
+  *Default*: `reviewer2_form_responses.tsv`
+
+- metadata table (`-m`) :
+  
+  It's often useful to add extra info to the image pages to help with review - such as image descriptions, quality scores, etc.
+  To enable this, there are several ways to specify arbitrary key-value pairs to add to specific image pages.
+  The 1st way is to put a file called `reviewer2_metadata.json` next to the image(s). All keys and values from this file
+  will then appear on that image page. The 2nd way is to use `-m` to pass in a metadata table 
+  (`.tsv` or `.xls`) with a `Path` column + arbitrary other columns. If the `Path` value matches the relative directory containing 
+  the image(s), entries from that row in the table will be added to this image page.  
+  
+  Since the keys and values are treated as html, they can be used to add more complex info - such as
+  colors, text formatting, <img ..> tags with images from other web pages, and even iframes containing entire sections of external pages, etc. 
+
+  It's expected that `reviewer2_metadata.json` files and/or the metadata table will be generated before running reviewer2.
+
+- `~/.reviewer2_config`  
+
+  The same settings that can be provided on the command line can optionally be set via this YAML config file instead.
+  
+  
+For more details, run:   
+```
+python3 -m reviewer2 --help
+```
+
+### Development:
 
 To create a local dev instance, run
 
 ```
 git clone git@github.com:bw2/reviewer2.git
-
 cd reviewer2
 
-# start server in debug mode:
-DEBUG=True python3 -m reviewer2 -d /path/dir-with-images
+# start server in dev mode:
+python3 -m reviewer2 -d /path/dir-with-images --dev-mode
 ```

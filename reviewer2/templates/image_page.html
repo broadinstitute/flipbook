@@ -2,18 +2,35 @@
 <html lang="en">
 <head>
     <meta content="width=device-width, initial-scale=1" charset="utf-8" name="viewport" />
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css" />
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-serialize-object/2.5.0/jquery.serialize-object.min.js"></script>
+
     <link rel="icon" href="/favicon2.png" type="image/x-icon"/>
-    <title>reviewer2: {{dirname}}</title>
+    <title>reviewer2: {{ relative_directory }}</title>
     <style>
         .img-default-view {
-            max-width: 100%;
             cursor: zoom-in;
+            max-width: 100% !important;
         }
         .img-zoomed-in-view {
             cursor: zoom-out;
+        }
+        .ui.grid>.row>.column>img, .ui.grid>.row>img {
+            max-width: unset;
+        }
+        .keyboard-shortcut {
+            border-color: rgba(0, 0, 0, 0.55);
+            border-style: solid;
+            border-width: 1px;
+            border-radius: 5px;
+            padding: 1px 4px 2px;
+            margin-left: 0.5em;
+            color: rgba(0, 0, 0, 0.55);
+            font-size: 0.8em;
         }
     </style>
 </head>
@@ -25,78 +42,150 @@
                 <div class="ui stackable grid">
                     <div class="row">
                         <div class="one wide column"></div>
-                        <div class="two wide column">
-                            {% if i > 1 %}
-                                <a href="{{ get_image_page_url(i - 1, last) }}">
-                                    <i class="arrow left icon"></i> &nbsp; prev
-                                </a>
-                            {% else %}
+                        <div class="three wide column" style="white-space: nowrap">
+                            <a id="prevlink" href="{{ get_image_page_url(i - 1, last) if i > 1  else '#' }}" style="white-space: nowrap">
+                                <span style="margin-right: 10px" class="keyboard-shortcut">&lt; or [</span>
                                 <i class="arrow left icon"></i> &nbsp; prev
-                            {% endif %}
-                            &nbsp;
-                            {% if i < last %}
-                                <a href="{{ get_image_page_url(i + 1, last) }}">
-                                    next &nbsp; <i class="arrow right icon"></i>
-                                </a>
-                            {% else %}
+                            </a>
+                            &nbsp; &nbsp;
+                            <a id="nextlink" href="{{ get_image_page_url(i + 1, last) if i < last else '#' }}" style="white-space: nowrap">
                                 next &nbsp; <i class="arrow right icon"></i>
-                            {% endif %}
+                                <span style="margin-left: 10px" class="keyboard-shortcut">] or &gt;</span>
+                            </a>
                         </div>
-                        <div class="two wide column">
-                            <a href="/"><i class="home icon"></i> &nbsp; page list</a>
+                        <div class="three wide column">
+                            <span style="margin-left: 30px">
+                                <a id="homelink" href="/" style="white-space: nowrap">
+                                    <i class="home icon"></i> &nbsp; page list
+                                    <span style="margin-left: 10px" class="keyboard-shortcut">h or p</span>
+                                </a>
+                            </span>
                         </div>
-                        <div class="six wide column" style="text-align:center">
-                            <b>page #{{i}} of {{last}}: &nbsp; {{dirname}}</b>
+                        <div class="four wide column" style="text-align:center">
+                            <b>page #{{ i }} of {{ last }}: &nbsp; {{ relative_directory }}</b>
                         </div>
                         <div class="one wide column"></div>
                     </div>
                 </div>
                 {% if metadata_json|length > 0 %}
-                    <hr />
+                    <div class="ui divider"></div>
                     {% for key, value in metadata_json.items() %}
-                        <b>{{ key }}</b>: {{ value }}<br />
+                        <div style="margin-left: 10px; display: inline-block"><b>{{ key }}</b>: {{ value }}</div>
                     {% endfor %}
                 {% endif %}
-                <br/>
+                {% if form_schema %}
+                    <div class="ui divider"></div>
+                    <form class="ui form">
+                        <input type="hidden" name="relative_directory" value="{{ relative_directory }}" />
+                        <div class="inline fields" style="white-space: nowrap">
+                            {% set is_first_iter = True %}
+                            {% for form_schema_row in form_schema %}
+                                {% if form_schema_row["type"] == "radio" %}
+                                    <label for="{{ form_schema_row['name'] }}" style="margin-left: {{ 10 if is_first_iter else 35 }}px">
+                                        {{ form_schema_row['inputLabel'] }}
+                                    </label>
+                                    {% for choice in form_schema_row['choices'] %}
+                                        <div class="field">
+                                            <div class="ui radio checkbox">
+                                                <input type="radio"
+                                                       autofocus
+                                                       name="{{ form_schema_row['name'] }}"
+                                                       value="{{ choice['value'] }}"
+                                                       class="hidden"
+                                                       {{ "checked" if form_responses.get(form_schema_row['columnName']) == choice['value'] else "" }}
+                                                >
+                                                <label>{{ choice['label'] }}</label>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                {% elif form_schema_row["type"] == "text" %}
+                                    <div class="field" style="margin-left: 35px">
+                                        <input type="text"
+                                               name="{{ form_schema_row['name'] }}"
+                                               size="{{ form_schema_row.get('size', 100) }}"
+                                               placeholder="{{ form_schema_row['columnName'] }}"
+                                               value="{{ form_responses.get(form_schema_row['columnName']) or '' }}">
+                                    </div>
+                                {% endif %}
+                                {% set is_first_iter = False %}
+                            {% endfor %}
+                            <div id="save-status" style="display:none">
+                                <i class="icon"></i>
+                                <span></span>
+                            </div>
+                            <!-- div style="margin: 15px 0px 15px 35px" class="ui submit button">Save</div -->
+                        </div>
+                    </form>
+                {% endif %}
                 {% for image_path in image_paths %}
-                    <hr />
-                    <b>{{ image_path }}</b> <br />
-                    <span><img class="img-default-view" src="/{{ image_path }}" /></span><br />
-                    <br />
+                    <div class="ui divider"></div>
+                    <div style="margin: 10px"><b>{{ image_path }}</b></div>
+                    <img class="img-default-view" src="/{{ image_path }}" />
                 {% endfor %}
-                <br />
-                <!-- div class="ui form">
-                    <div style="display:inline-block; padding-right:15px">Verdict:</div>
-                    <div style="display:inline-block" class="inline fields">
-                        <div style="display:inline-block" class="field">
-                            <div class="ui radio checkbox">
-                                <input type="radio" name="q1" checked tabindex="0" class="hidden"><label>ok</label>
-                            </div>
-                        </div>
-                        <div style="display:inline-block" class="field">
-                            <div class="ui radio checkbox">
-                                <input type="radio" name="q1" checked tabindex="0" class="hidden"><label>nope</label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="ui submit button" onClick="submit_form()">Submit</div>
-                </div -->
             </div>
             <div class="one wide column"></div>
         </div>
     </div>
     <script type="text/javascript">
+      //misc. init
       $('.ui.radio.checkbox').checkbox();
 
       $('.img-default-view').click((event) => {
         $(event.target).toggleClass('img-default-view img-zoomed-in-view')
       })
 
-      /*
-      submit_form = () => {
-        console.log('submit')
+      //form submission
+      const apiSpec = {
+        url: '/save',
+        interruptRequests: true,
+        method : 'POST',
+        serializeForm: true,
+        throttleFirstRequest: false,
+        throttle: 200,
+        onRequest: function(request) {
+          $('#save-status i').attr('class', 'spinner loading icon')
+          $('#save-status i').attr('style', 'color:#666666')
+          $('#save-status span').text('Saving...')
+          $('#save-status').show()
+        },
+        onComplete: function(response) {
+          // always called after XHR complete
+          $('#save-status').delay(500).fadeOut('slow');
+        },
+        onSuccess: function(response) {
+          // valid response and response.success = true
+          //console.log("onSuccess", response)
+          $('#save-status i').attr('class', 'check circle icon')
+          $('#save-status i').attr('style', 'color:#00AA00')
+          $('#save-status span').text('Saved')
+          $('#save-status').show()
+        },
+        onFailure: function(response) {
+          // request failed, or valid response but response.success = false
+          //console.log("onFailure", response)
+          $('#save-status i').attr('class', 'exclamation circle icon')
+          $('#save-status i').attr('style', 'color:#FF0000')
+          $('#save-status span').text(`Couldn't save ${response.error}`)
+          $('#save-status').show()
+        },
       }
-      */
+      $('form input[type=text]').api(apiSpec)
+      $('.form .ui.radio').api(apiSpec)
+      //$('form .submit.button').api(apiSpec)
+
+      //keyboard shortcuts
+      $('body').keypress((event) => {
+        const key = String.fromCharCode(event.keyCode)
+        console.log(key, event)
+        switch (key) {
+          case '[':  $("#prevlink")[0].click(); break;
+          case '<':  $("#prevlink")[0].click(); break;
+          case ']':  $("#nextlink")[0].click(); break;
+          case '>':  $("#nextlink")[0].click(); break;
+          case 'h':  $("#homelink")[0].click(); break;
+          case 'p':  $("#homelink")[0].click(); break;
+        }
+      })
     </script>
 </body>
 </html>

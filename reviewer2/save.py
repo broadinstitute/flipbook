@@ -1,28 +1,45 @@
+import json
+from flask import request, Response
+import pandas as pd
+
+from reviewer2 import args, FORM_SCHEMA, FORM_RESPONSES, FORM_SCHEMA_COLUMNS
 
 
+def error_response(message, status=400):
+    return Response(json.dumps({"error": message}), status=status, mimetype='application/json')
 
-def save():
-    start_time = datetime.now()
-    logging_prefix = start_time.strftime("%m/%d/%Y %H:%M:%S") + f" t{os.getpid()}"
+
+def save_form_handler():
+    if not FORM_SCHEMA:
+        return error_response("Server state error: form table not initialized", status=500)
 
     # check params
-    params = {}
-    if request.values:
-        params.update(request.values)
+    params = request.form
+    if 'relative_directory' not in params:
+        return error_response("'relative_directory' not provided")
 
-    if 'variant' not in params:
-        params.update(request.get_json(force=True, silent=True) or {})
+    # transfer values to FORM_RESPONSES
+    for form_schema_row in [{'name': 'relative_directory', 'columnName': 'Path'}] + FORM_SCHEMA:
+        value = params.get(form_schema_row['name'])
+        if value is None:
+            continue
+        if params['relative_directory'] not in FORM_RESPONSES:
+            FORM_RESPONSES[params['relative_directory']] = {}
+            if args.verbose:
+                print(f"Adding {params['relative_directory']} row to responses")
 
-    results = {}
+        FORM_RESPONSES[params['relative_directory']][form_schema_row['columnName']] = value
+        if args.verbose:
+            print(f"Setting {params['relative_directory']} {form_schema_row['columnName']} = {value}")
 
-    status = 400 if results.get("error") else 200
+    # write FORM_RESPONSES to file
+    # NOTE: This is not thread-safe and assumes a single-threaded server. For multi-threaded
+    # or multi-process servers like gunicorn, this will need to be replaced with a sqlite or redis backend.
+    df = pd.DataFrame(FORM_RESPONSES.values(), columns=['Path'] + FORM_SCHEMA_COLUMNS).fillna('')
+    if args.form_responses_table_is_excel:
+        df.to_excel(args.form_responses_table)
+    else:
+        df.to_csv(args.form_responses_table, sep="\t", header=True, index=False)
 
-    response_json = {}
-    response_json.update(params)  # copy input params to output
-    response_json.update(results)
-
-    duration = str(datetime.now() - start_time)
-    response_json['duration'] = duration
-
-    return Response(json.dumps(response_json), status=status, mimetype='application/json')
+    return Response(json.dumps({"success": True}), status=200, mimetype='application/json')
 
