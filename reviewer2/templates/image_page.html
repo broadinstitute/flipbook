@@ -174,9 +174,11 @@
       //$('form .submit.button').api(apiSpec)
 
       //keyboard shortcuts
-      $('body').keypress((event) => {
+      $(document).keypress((event) => {
+        if ((event.target.tagName || '').toLowerCase() == 'input' && event.target.type == 'text') {
+            return
+        }
         const key = String.fromCharCode(event.keyCode)
-        console.log(key, event)
         switch (key) {
           case '[':  $("#prevlink")[0].click(); break;
           case '<':  $("#prevlink")[0].click(); break;

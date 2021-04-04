@@ -8,6 +8,7 @@ import pkg_resources
 
 METADATA_FILENAME = "reviewer2_metadata.json"
 
+
 def get_relative_directory_to_image_files_list(top_level_dir, keywords_to_exclude, verbose=False):
     image_paths = []
     for suffix in "svg", "png", "jpeg", "jpg", "gif", "webp":
@@ -33,6 +34,7 @@ def get_relative_directory_to_image_files_list(top_level_dir, keywords_to_exclud
                     break
             if skip_this_path:
                 continue
+
         relative_directory_to_image_files[os.path.dirname(relative_image_path)].append(relative_image_path)
 
     print(f"Found {len(image_paths)} images in {len(relative_directory_to_image_files)} directories")
