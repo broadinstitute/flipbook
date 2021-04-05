@@ -36,7 +36,7 @@ def get_relative_directory_to_image_files_list(top_level_dir, keywords_to_exclud
                 continue
 
         key = os.path.dirname(relative_image_path)
-        if not key or key ==".":
+        if not key or key == ".":
             key = relative_image_path
         relative_directory_to_image_files[key].append(relative_image_path)
 
