@@ -49,7 +49,7 @@ After the server is running, open your web browser to [http://localhost:8080](ht
 
 - responses table (`-t`)
 
-  As users fill in the forms at the top of the image pages, the responses are written to this table. 
+  As you fill in the forms at the top of the image pages, the responses are written to this table. 
   
   *Default*: `reviewer2_form_responses.tsv`
 
