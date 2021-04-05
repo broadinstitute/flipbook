@@ -39,6 +39,7 @@
     </style>
 </head>
 <body style="overflow-x: scroll">
+    {% set tabindex = 0 %}
     <div class="ui stackable grid" style="margin-top: 1px">
         <div class="row">
             <div class="one wide column"></div>
@@ -85,7 +86,7 @@
                 {% endif %}
                 {% if form_schema %}
                     <div class="ui divider"></div>
-                    <form class="ui form">
+                    <form class="ui form" onsubmit="return false">
                         <input type="hidden" name="relative_directory" value="{{ relative_directory }}" />
                         <div class="inline fields" style="white-space: nowrap">
                             {% set is_first_iter = True %}
@@ -98,15 +99,17 @@
                                         <div class="field">
                                             <div class="ui radio checkbox">
                                                 <input type="radio"
-                                                       autofocus
                                                        name="{{ form_schema_row['name'] }}"
                                                        value="{{ choice['value'] }}"
                                                        class="hidden"
+                                                       tabindex="{{ tabindex }}"
+                                                       autofocus
                                                        {{ "checked" if form_responses.get(form_schema_row['columnName']) == choice['value'] else "" }}
                                                 >
                                                 <label>{{ choice['label'] }}</label>
                                             </div>
                                         </div>
+                                        {% set tabindex = tabindex + 1 %}
                                     {% endfor %}
                                 {% elif form_schema_row["type"] == "text" %}
                                     <div class="field" style="margin-left: 35px">
@@ -114,8 +117,12 @@
                                                name="{{ form_schema_row['name'] }}"
                                                size="{{ form_schema_row.get('size', 100) }}"
                                                placeholder="{{ form_schema_row['columnName'] }}"
-                                               value="{{ form_responses.get(form_schema_row['columnName']) or '' }}">
+                                               value="{{ form_responses.get(form_schema_row['columnName']) or '' }}"
+                                               tabindex="{{ tabindex }}"
+                                               autofocus
+                                        >
                                     </div>
+                                    {% set tabindex = tabindex + 1 %}
                                 {% endif %}
                                 {% set is_first_iter = False %}
                             {% endfor %}
@@ -130,7 +137,8 @@
                 {% for image_path in image_paths %}
                     <div class="ui divider"></div>
                     <div style="margin: 10px"><b>{{ image_path }}</b></div>
-                    <img class="img-default-view" src="/{{ image_path }}" />
+                    <img class="img-default-view" src="/{{ image_path }}" tabindex="{{ tabindex }}"/>
+                    {% set tabindex = tabindex + 1 %}
                 {% endfor %}
             </div>
             <div class="one wide column"></div>
@@ -140,8 +148,10 @@
       //misc. init
       $('.ui.radio.checkbox').checkbox();
 
-      $('.img-default-view').click((event) => {
-        $(event.target).toggleClass('img-default-view img-zoomed-in-view')
+      $('.img-default-view').on('keypress click', (event) => {
+        if (event.type === 'click' || event.which === 13 || event.which === 32 || event.which === 43 || event.which === 35) {
+            $(event.target).toggleClass('img-default-view img-zoomed-in-view')
+        }
       })
 
       //form submission
@@ -149,9 +159,10 @@
         url: '/save',
         interruptRequests: true,
         method : 'POST',
+        on: 'change keyup',
         serializeForm: true,
         throttleFirstRequest: false,
-        throttle: 200,
+        throttle: 500,
         onRequest: function(request) {
           $('#save-status i').attr('class', 'spinner loading icon')
           $('#save-status i').attr('style', 'color:#666666')
