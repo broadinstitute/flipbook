@@ -178,14 +178,21 @@
         if ((event.target.tagName || '').toLowerCase() == 'input' && event.target.type == 'text') {
             return
         }
+        const keyToSelectorMap = {
+          '[':  "#prevlink",
+          '<':  "#prevlink",
+          ']':  "#nextlink",
+          '>':  "#nextlink",
+          'h':  "#homelink",
+          'p':  "#homelink",
+        }
         const key = String.fromCharCode(event.keyCode)
-        switch (key) {
-          case '[':  $("#prevlink")[0].click(); break;
-          case '<':  $("#prevlink")[0].click(); break;
-          case ']':  $("#nextlink")[0].click(); break;
-          case '>':  $("#nextlink")[0].click(); break;
-          case 'h':  $("#homelink")[0].click(); break;
-          case 'p':  $("#homelink")[0].click(); break;
+        const selector = keyToSelectorMap[key]
+        if (selector) {
+            const obj = $(selector)
+            if (obj.length > 0) {
+              obj[0].click()
+            }
         }
       })
     </script>
