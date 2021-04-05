@@ -18,7 +18,7 @@ Also, it optionally shows a customizable form where you can take notes or answer
 
 -------
 
-[![PyPI version](https://img.shields.io/pypi/v/reviewer2.svg?style=flat)](https://shields.io/)  [![Supported Python versions](https://img.shields.io/pypi/pyversions/reviewer2.svg)](https://shields.io/)
+[![PyPI version](https://img.shields.io/pypi/v/reviewer2.svg?style=flat)](https://pypi.org/project/reviewer2/)  [![Supported Python versions](https://img.shields.io/pypi/pyversions/reviewer2.svg)](https://shields.io/)
 
 
 ### Install:
