@@ -55,18 +55,16 @@ After the server is running, open your web browser to [http://localhost:8080](ht
   It's often useful to add extra info to the image pages to help with review - such as image descriptions, quality scores, etc.
   To enable this, there are several ways to specify arbitrary key-value pairs to add to specific image pages.
   The 1st way is to put a file called `reviewer2_metadata.json` next to the image(s). All keys and values from this file
-  will then appear on that image page. The 2nd way is to use `-m` to pass in a metadata table 
+  will appear on that image page. The 2nd way is to use `-m` to pass in a metadata table 
   (`.tsv` or `.xls`) with a `Path` column + arbitrary other columns. If the `Path` value matches the relative directory containing 
   the image(s), entries from that row in the table will be added to this image page.  
   
   Since the keys and values are treated as html, they can be used to add more complex info - such as
-  colors, text formatting, <img ..> tags with images from other web pages, and even iframes containing entire sections of external pages, etc. 
-
-  It's expected that `reviewer2_metadata.json` files and/or the metadata table will be generated before running reviewer2.
+  colors, text formatting, <img ..> tags with images from other web pages, iframes containing entire sections of external pages, etc. 
 
 - `~/.reviewer2_config`  
 
-  The same settings that can be provided on the command line can optionally be set via this YAML config file instead.
+  Most settings that can be provided on the command line can optionally be set via this YAML config file instead.
   
   
 For more details, run:   
