@@ -67,8 +67,8 @@
                         <div class="three wide column">
                             <span style="margin-left: 30px">
                                 <a id="homelink" href="/" style="white-space: nowrap">
-                                    <i class="home icon"></i> &nbsp; page list
-                                    <span style="margin-left: 10px" class="keyboard-shortcut">h or p</span>
+                                    <i class="home icon"></i> &nbsp; table
+                                    <span style="margin-left: 10px" class="keyboard-shortcut">h or t</span>
                                 </a>
                             </span>
                         </div>
@@ -159,10 +159,10 @@
         url: '/save',
         interruptRequests: true,
         method : 'POST',
-        on: 'change keyup',
+        on: 'keypress change',
         serializeForm: true,
         throttleFirstRequest: false,
-        throttle: 500,
+        throttle: 300,
         onRequest: function(request) {
           $('#save-status i').attr('class', 'spinner loading icon')
           $('#save-status i').attr('style', 'color:#666666')
@@ -200,12 +200,16 @@
             return
         }
         const keyToSelectorMap = {
-          '[':  "#prevlink",
-          '<':  "#prevlink",
-          ']':  "#nextlink",
-          '>':  "#nextlink",
-          'h':  "#homelink",
-          'p':  "#homelink",
+          '[': "#prevlink",
+          '<': "#prevlink",
+          'p': "#prevlink",
+          'P': "#prevlink",
+          ']': "#nextlink",
+          '>': "#nextlink",
+          'n': "#nextlink",
+          'N': "#nextlink",
+          'h': "#homelink",
+          't': "#homelink",
         }
         const key = String.fromCharCode(event.keyCode)
         const selector = keyToSelectorMap[key]
