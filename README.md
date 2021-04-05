@@ -68,7 +68,7 @@ After the server is running, open your web browser to [http://localhost:8080](ht
 - custom form schema (`--form-schema-json`):  
    
   Path of .json file containing a custom form schema. For the expected format see the FORM_SCHEMA value in 
-  [https://github.com/bw2/reviewer2/blob/main/reviewer2/__init__a.py](https://github.com/bw2/reviewer2/blob/main/reviewer2/__init__a.py)
+  [https://github.com/broadinstitute/reviewer2/blob/main/reviewer2/__init__a.py](https://github.com/broadinstitute/reviewer2/blob/main/reviewer2/__init__a.py)
   
 - `~/.reviewer2_config`  
 
@@ -85,7 +85,7 @@ python3 -m reviewer2 --help
 To create a local dev instance, run
 
 ```
-git clone git@github.com:bw2/reviewer2.git
+git clone git@github.com:broadinstitute/reviewer2.git
 cd reviewer2
 
 # start server in dev mode:

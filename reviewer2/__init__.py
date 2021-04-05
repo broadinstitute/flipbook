@@ -32,7 +32,7 @@ p.add_argument("-m", "--metadata-table", default="reviewer2_metadata.tsv",
                     "this table. If both this table and 'reviewer2_metadata.json' files are found, the values from "
                     "this table will override values in the 'reviewer2_metadata.json' files.")
 p.add_argument("--form-schema-json", help="Path of .json file containing a custom form schema. For the expected format "
-                    "see the FORM_SCHEMA value in https://github.com/bw2/reviewer2/blob/main/reviewer2/__init__a.py")
+                    "see the FORM_SCHEMA value in https://github.com/broadinstitute/reviewer2/blob/main/reviewer2/__init__a.py")
 p.add_argument("-s", "--sort-by", action="append", help="Order pages by metadata column(s)")
 p.add_argument("--hide-metadata-on-home-page", action="store_true", help="Don't show metadata columns in the "
                "home page table")

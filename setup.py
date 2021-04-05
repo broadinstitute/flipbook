@@ -37,7 +37,7 @@ setup(
     python_requires=">=3.6",
     license="MIT",
     keywords='curation, NGS, sequencing, STRs, REviewer, read visualization, machine learning',
-    url='https://github.com/bw2/reviewer2',
+    url='https://github.com/broadinstitute/reviewer2',
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
