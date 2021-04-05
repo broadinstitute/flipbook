@@ -1,5 +1,6 @@
 import collections
 import configargparse
+import json
 import os
 import pandas as pd
 from reviewer2.utils import get_relative_directory_to_image_files_list, get_relative_directory_to_metadata, parse_table, \
@@ -22,8 +23,7 @@ p.add_argument("-t", "--form-responses-table", default="reviewer2_form_responses
                     "it will be parsed for previous form responses and then updated as the user fills in the form(s)."
                     "If the file doesn't exist, it will be created after the 1st form response.")
 p.add_argument("-m", "--metadata-table", default="reviewer2_metadata.tsv",
-               help="The .tsv or .xls path containing metadata to show on image pages. If the path is relative, it will "
-                    "be treated as relative to the directory specified by --directory. There are two optional ways"
+               help="The .tsv or .xls path containing metadata to show on image pages. There are two optional ways "
                     "to add metadata to the image pages. The 1st way is to put a 'reviewer2_metadata.json' file "
                     "in each directory that contains image files (in which case any  key-value pairs from the json "
                     "file will be shown at the top of the image page). The other way is to specify this table, which "
@@ -31,7 +31,8 @@ p.add_argument("-m", "--metadata-table", default="reviewer2_metadata.tsv",
                     "page corresponding to those directory paths will then display values from the other columns in "
                     "this table. If both this table and 'reviewer2_metadata.json' files are found, the values from "
                     "this table will override values in the 'reviewer2_metadata.json' files.")
-
+p.add_argument("--form-schema-json", help="Path of .json file containing a custom form schema. For the expected format "
+                    "see the FORM_SCHEMA value in https://github.com/bw2/reviewer2/blob/main/reviewer2/__init__a.py")
 p.add_argument("--hide-metadata-on-home-page", action="store_true", help="Don't show metadata columns in the "
                "home page table")
 #p.add_argument("-c", "--config-file", help="Path of yaml config file", env_var="REVIEWER2_CONFIG_FILE")
@@ -64,8 +65,8 @@ METADATA_COLUMNS, RELATIVE_DIRECTORY_TO_METADATA = get_relative_directory_to_met
 
 
 # parse metadata from the metadata_table if specified
-if args.metadata_table and os.path.isfile(os.path.join(args.directory, args.metadata_table)):
-    args.metadata_table = os.path.join(args.directory, args.metadata_table)
+if args.metadata_table and os.path.isfile(args.metadata_table):
+    #args.metadata_table = os.path.join(args.directory, args.metadata_table)
     try:
         df = parse_table(args.metadata_table)
     except ValueError as e:
@@ -111,6 +112,16 @@ FORM_SCHEMA = [
         'size': 100,
     },
 ]
+
+if args.form_schema_json and os.path.isfile(args.form_schema_json):
+    #args.form_schema_json = os.path.join(args.directory, args.form_schema_json)
+    print(f"Loading form schema from {args.form_schema_json}")
+    try:
+        with open(args.form_schema_json, "rt") as f:
+            FORM_SCHEMA = json.load(f)
+    except Exception as e:
+        p.error(f"Couldn't parse {args.form_schema_json}: {e}")
+
 
 FORM_SCHEMA_COLUMNS = [r['columnName'] for r in FORM_SCHEMA]
 

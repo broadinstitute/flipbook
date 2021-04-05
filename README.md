@@ -64,6 +64,11 @@ After the server is running, open your web browser to [http://localhost:8080](ht
 
   It's expected that `reviewer2_metadata.json` files and/or the metadata table will be generated before running reviewer2.
 
+- custom form schema (`--form-schema-json`):  
+   
+  Path of .json file containing a custom form schema. For the expected format see the FORM_SCHEMA value in 
+  [https://github.com/bw2/reviewer2/blob/main/reviewer2/__init__a.py](https://github.com/bw2/reviewer2/blob/main/reviewer2/__init__a.py)
+  
 - `~/.reviewer2_config`  
 
   The same settings that can be provided on the command line can optionally be set via this YAML config file instead.
