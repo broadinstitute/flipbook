@@ -46,7 +46,6 @@
             <div class="fourteen wide column">
                 <div class="ui stackable grid">
                     <div class="row">
-                        <div class="one wide column"></div>
                         <div class="three wide column" style="white-space: nowrap">
                             <a id="prevlink"
                                href="{{ get_image_page_url(i - 1, last) if i > 1  else '#' }}"
@@ -64,7 +63,7 @@
                                 <span style="margin-left: 10px" class="keyboard-shortcut">] or &gt;</span>
                             </a>
                         </div>
-                        <div class="two wide column">
+                        <div class="three wide column">
                             <span style="margin-left: 30px">
                                 <a id="homelink" href="/" style="white-space: nowrap">
                                     <i class="home icon"></i> &nbsp; table
@@ -75,8 +74,7 @@
                         <div class="four wide column" style="text-align:center">
                             <b>page #{{ i }} of {{ last }}: &nbsp; {{ relative_directory }}</b>
                         </div>
-                        <div class="five wide column"></div>
-                        <div class="one wide column"></div>
+                        <div class="six wide column"></div>
                     </div>
                 </div>
                 {% if metadata_json|length > 0 %}
