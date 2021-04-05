@@ -33,8 +33,10 @@ p.add_argument("-m", "--metadata-table", default="reviewer2_metadata.tsv",
                     "this table will override values in the 'reviewer2_metadata.json' files.")
 p.add_argument("--form-schema-json", help="Path of .json file containing a custom form schema. For the expected format "
                     "see the FORM_SCHEMA value in https://github.com/bw2/reviewer2/blob/main/reviewer2/__init__a.py")
+p.add_argument("-s", "--sort-by", action="append", help="Order pages by metadata column(s)")
 p.add_argument("--hide-metadata-on-home-page", action="store_true", help="Don't show metadata columns in the "
                "home page table")
+
 #p.add_argument("-c", "--config-file", help="Path of yaml config file", env_var="REVIEWER2_CONFIG_FILE")
 p.add_argument("-v", "--verbose", action="store_true", env_var="VERBOSE", help="Print more info")
 p.add_argument("--host", default="127.0.0.1", env_var="HOST", help="Listen for connections on this hostname or IP")
@@ -56,6 +58,7 @@ RELATIVE_DIRECTORY_TO_IMAGE_FILES_LIST = get_relative_directory_to_image_files_l
 
 if not RELATIVE_DIRECTORY_TO_IMAGE_FILES_LIST:
     p.error(f"No images found in {args.directory}")
+
 
 # parse metadata from reviewer2_metadata.json files
 METADATA_COLUMNS, RELATIVE_DIRECTORY_TO_METADATA = get_relative_directory_to_metadata(
@@ -86,6 +89,16 @@ if args.metadata_table and os.path.isfile(args.metadata_table):
         for key in metadata_dict:
             if key not in METADATA_COLUMNS:
                 METADATA_COLUMNS.append(key)
+
+if METADATA_COLUMNS and args.sort_by:
+    invalid_values = ", ".join([f"'{s}'" for s in args.sort_by if s not in METADATA_COLUMNS])
+    if invalid_values:
+        p.error(f"{invalid_values} column(s) not found in metadata. --sort-by value should be one of: " +
+                ", ".join(METADATA_COLUMNS))
+
+    print(f"Sorting pages by {', '.join(args.sort_by)}")
+    get_sort_key = lambda i: tuple([str(RELATIVE_DIRECTORY_TO_METADATA.get(i[0], {}).get(s)) for s in args.sort_by])
+    RELATIVE_DIRECTORY_TO_IMAGE_FILES_LIST = sorted(RELATIVE_DIRECTORY_TO_IMAGE_FILES_LIST, key=get_sort_key)
 
 # define input form fields to show on each image page
 FORM_SCHEMA = [
@@ -179,4 +192,4 @@ if FORM_SCHEMA:
     for relative_directory, row in df.iterrows():
         FORM_RESPONSES[relative_directory] = row.to_dict()
 
-    print(f"User responses will be saved to {args.form_responses_table} with columns: {', '.join(FORM_SCHEMA_COLUMNS)}")
+    print(f"Will save form responses to {args.form_responses_table}  (columns: {', '.join(FORM_SCHEMA_COLUMNS)})")

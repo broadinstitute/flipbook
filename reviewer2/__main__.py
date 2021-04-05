@@ -27,6 +27,8 @@ app.add_url_rule('/page', view_func=image_page_handler, methods=['POST', 'GET'])
 app.add_url_rule('/save', view_func=save_form_handler, methods=['POST'])
 app.add_url_rule('/<path:path>', view_func=send_file, methods=['GET'])
 
+os.environ["WERKZEUG_RUN_MAIN"] = "true"
+
 app.run(
     debug=args.dev_mode,
     host=os.environ.get('HOST', '127.0.0.1'),

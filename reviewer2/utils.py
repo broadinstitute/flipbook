@@ -39,7 +39,7 @@ def get_relative_directory_to_image_files_list(top_level_dir, keywords_to_exclud
 
     print(f"Found {len(image_paths)} images in {len(relative_directory_to_image_files)} directories")
     for excluded_keyword, matching_paths in excluded_keyword_to_matching_paths.items():
-        print(f"Skipped {len(matching_paths)} paths that contained excluded keyword: '{keyword_to_exclude}'")
+        print(f"Skipped {len(matching_paths)} paths with excluded keyword: '{keyword_to_exclude}'")
 
     relative_directory_to_image_files_list = list(sorted(relative_directory_to_image_files.items()))
 

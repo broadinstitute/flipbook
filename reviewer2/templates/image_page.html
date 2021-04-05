@@ -32,6 +32,10 @@
             color: rgba(0, 0, 0, 0.55);
             font-size: 0.8em;
         }
+        .disabled-link {
+            color: #AAA;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body style="overflow-x: scroll">
@@ -43,12 +47,18 @@
                     <div class="row">
                         <div class="one wide column"></div>
                         <div class="three wide column" style="white-space: nowrap">
-                            <a id="prevlink" href="{{ get_image_page_url(i - 1, last) if i > 1  else '#' }}" style="white-space: nowrap">
+                            <a id="prevlink"
+                               href="{{ get_image_page_url(i - 1, last) if i > 1  else '#' }}"
+                               class="{{ '' if i > 1  else 'disabled-link' }}"
+                               style="white-space: nowrap">
                                 <span style="margin-right: 10px" class="keyboard-shortcut">&lt; or [</span>
                                 <i class="arrow left icon"></i> &nbsp; prev
                             </a>
                             &nbsp; &nbsp;
-                            <a id="nextlink" href="{{ get_image_page_url(i + 1, last) if i < last else '#' }}" style="white-space: nowrap">
+                            <a id="nextlink"
+                               href="{{ get_image_page_url(i + 1, last) if i < last else '#' }}"
+                               class="{{ '' if i < last else 'disabled-link' }}"
+                               style="white-space: nowrap">
                                 next &nbsp; <i class="arrow right icon"></i>
                                 <span style="margin-left: 10px" class="keyboard-shortcut">] or &gt;</span>
                             </a>
