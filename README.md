@@ -11,7 +11,7 @@ Also, it optionally shows a customizable form where you can take notes or answer
 ### Features:
 
 - simple way to flip through many local image files using your web browser
-- crawls a top-level directory to find .png, .jpeg, .gif, or .svg image files
+- crawls a top-level directory to find .png, .jpeg, or .svg image files
 - web interface: home page lists all images
 - web interface: image pages show the image, an optional customizable form where you can take notes or answer questions about the image, and next/previous page links
 - use subdirectories to group images. Any images found in the same subdirectory will be shown on the same web page. Also, `reviewer2_metadata.json` files can optionally be added to a subdirectory and provide metadata to show at the top of a specific image page.
