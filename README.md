@@ -14,7 +14,7 @@ Also, it optionally shows a customizable form where you can take notes or answer
 - crawls a top-level directory to find .png, .jpeg, or .svg image files
 - web interface: home page lists all images
 - web interface: image pages show the image, an optional customizable form where you can take notes or answer questions about the image, next/previous page links, and optional other customizable info for context
-- use subdirectories to group images. Any images found in the same subdirectory will be shown on the same page.  
+- use subdirectories to group images. Any images found in the same subdirectory will be shown on the same page  
 
 -------
 
@@ -88,6 +88,6 @@ To create a local dev instance, run
 git clone git@github.com:broadinstitute/reviewer2.git
 cd reviewer2
 
-# start server in dev mode:
+# start server in dev mode so it reloads code on change
 python3 -m reviewer2 -d /path/dir-with-images --dev-mode
 ```
