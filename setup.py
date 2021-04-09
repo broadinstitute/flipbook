@@ -32,6 +32,7 @@ setup(
     long_description_content_type="text/markdown",
     long_description=long_description,
     packages=["reviewer2"],
+    py_modules=["compare_form_response_tables"],
     include_package_data=True,
     package_data={'': ['*/*.png', '*/*.html']},
     python_requires=">=3.6",
