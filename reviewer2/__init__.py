@@ -113,10 +113,10 @@ FORM_SCHEMA = [
     {
         'type': 'radio',
         'columnName': 'Confidence',
-        'inputLabel': 'Are you sure?',
+        'inputLabel': 'Confidence',
         'choices': [
-            {'value': 'high', 'label': 'Yeah'},
-            {'value': 'low', 'label': 'Not really'},
+            {'value': 'high', 'label': 'High'},
+            {'value': 'low', 'label': 'Low'},
         ],
     },
     {
