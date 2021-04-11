@@ -15,7 +15,7 @@ def parse_args():
         "reviewing the same images. Rows in the two tables are matched by their same Path column.")
     p.add_argument("-s1", "--suffix1", help="Suffix to append to column names from table1", default="1")
     p.add_argument("-s2", "--suffix2", help="Suffix to append to column names from table2", default="2")
-    p.add_argument("-o", "--output-tsv", help="Path of output .tsv", default="combined.tsv")
+    p.add_argument("-o", "--output-table", help="Path of output .tsv or .xls", default="combined.tsv")
     p.add_argument("table1", help="Path of form response table .tsv")
     p.add_argument("table2", help="Path of form response table .tsv")
     args = p.parse_args()
@@ -68,12 +68,15 @@ def compute_discordance_columns_func(suffix1, suffix2):
             row[DISCORDANT_SCORE_COLUMN] = 0
             row[DISCORDANT_TEXT_COLUMN] = "same verdict"
             if row[confidence_column1] and row[confidence_column2]:
-                if row[confidence_column1] == row[confidence_column2]:
+                if row[confidence_column1] == HIGH_CONFIDENCE and row[confidence_column2] == HIGH_CONFIDENCE:
                     row[DISCORDANT_SCORE_COLUMN] = 0
-                    row[DISCORDANT_TEXT_COLUMN] = "same verdict, same confidence"
-                else:
+                    row[DISCORDANT_TEXT_COLUMN] = "same verdict, both high confidence"
+                elif row[confidence_column1] == HIGH_CONFIDENCE or row[confidence_column2] == HIGH_CONFIDENCE:
                     row[DISCORDANT_SCORE_COLUMN] = 1
-                    row[DISCORDANT_TEXT_COLUMN] = "same verdict, different confidence"
+                    row[DISCORDANT_TEXT_COLUMN] = "same verdict, one high confidence"
+                else:
+                    row[DISCORDANT_SCORE_COLUMN] = 0
+                    row[DISCORDANT_TEXT_COLUMN] = "same verdict, zero high confidence"
         else:
             # different verdicts
             row[DISCORDANT_VERDICT_COLUMN] = 1
@@ -101,13 +104,17 @@ def main():
     df_joined = df_joined.fillna('')
 
     #  print stats about input tables
+    def get_counts_string(df, column, label="", sep=", "):
+        return sep.join(
+            [f"{count:2d} {label} {key}" for key, count in sorted(collections.Counter(df[column]).items())])
+
     print("-"*20)
-    df1_verdicts_counter = ", ".join([f"{count:2d} {key}" for key, count in sorted(collections.Counter(df1['Verdict']).items())])
+    df1_verdicts_counter = get_counts_string(df1, "Verdict")
     df1_num_verdicts = sum(df1['Verdict'].str.len() > 0)
     df1_num_high_confidence = collections.Counter(df1['Confidence']).get(HIGH_CONFIDENCE, 0)
     df1_high_confidence_fraction = df1_num_high_confidence / df1_num_verdicts
 
-    df2_verdicts_counter = ", ".join([f"{count:2d} {key}" for key, count in sorted(collections.Counter(df2['Verdict']).items())])
+    df2_verdicts_counter = get_counts_string(df2, "Verdict")
     df2_num_verdicts = sum(df2['Verdict'].str.len() > 0)
     df2_num_high_confidence = collections.Counter(df2['Confidence']).get(HIGH_CONFIDENCE, 0)
     df2_high_confidence_fraction = df2_num_high_confidence / df2_num_verdicts
@@ -124,12 +131,18 @@ def main():
     print(f"{num_discordant_verdicts} out of {len(df_joined)} ({100*num_discordant_verdicts/len(df_joined):0.1f}%) of "
           f"verdicts differed between the two tables")
     print(f"\nDiscordance score = {sum(df_joined[DISCORDANT_SCORE_COLUMN])}:")
-    print("\n".join([f"{count:2d} review comparisons: {key}" for key, count in sorted(collections.Counter(df_joined[DISCORDANT_TEXT_COLUMN]).items())]))
+    print(get_counts_string(df_joined, DISCORDANT_TEXT_COLUMN, label="review comparisons:", sep="\n"))
 
-    # output table to tsv
+    # write outtable
     print("-"*20)
-    df_joined.to_csv(args.output_tsv, header=True, sep="\t", index=False)
-    print(f"Wrote {len(df_joined)} rows to {args.output_tsv}")
+    verdict_column1 = f"Verdict_{args.suffix1}"
+    confidence_column1 = f"Confidence_{args.suffix1}"
+    df_joined.sort_values([DISCORDANT_SCORE_COLUMN, verdict_column1, confidence_column1], ascending=False, inplace=True)
+    if args.output_table.endswith(".xls") or args.output_table.endswith(".xlsx"):
+        df_joined.to_excel(args.output_table, header=True, index=False)
+    else:
+        df_joined.to_csv(args.output_table, header=True, sep="\t", index=False)
+    print(f"Wrote {len(df_joined)} rows to {args.output_table}")
 
 
 if __name__ == "__main__":
