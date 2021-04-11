@@ -80,6 +80,17 @@ For more details, run:
 python3 -m reviewer2 --help
 ```
 
+### Comparing reviews:
+
+If 2 or more people review the same images, the reviews can be compared using the `compare_form_response_tables` script.  
+
+For example:
+```
+python3 -m compare_form_response_tables egor_reviewer2_form_responses.tsv  ben_reviewer2_form_responses.tsv -o combined_responses.tsv -s1 egor -s2 ben
+```
+
+To see the full list of args and descriptions, run `python3 -m compare_form_response_tables --help`
+
 ### Development:
 
 To create a local dev instance, run
