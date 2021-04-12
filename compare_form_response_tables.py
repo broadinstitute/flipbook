@@ -137,7 +137,9 @@ def main():
     print("-"*20)
     verdict_column1 = f"Verdict_{args.suffix1}"
     confidence_column1 = f"Confidence_{args.suffix1}"
-    df_joined.sort_values([DISCORDANT_SCORE_COLUMN, verdict_column1, confidence_column1], ascending=False, inplace=True)
+    df_joined.sort_values(
+        [DISCORDANT_SCORE_COLUMN, DISCORDANT_TEXT_COLUMN, verdict_column1, confidence_column1],
+        ascending=False, inplace=True)
     if args.output_table.endswith(".xls") or args.output_table.endswith(".xlsx"):
         df_joined.to_excel(args.output_table, header=True, index=False)
     else:
