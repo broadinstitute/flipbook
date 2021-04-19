@@ -72,7 +72,7 @@ After the server is running, open your web browser to [http://localhost:8080](ht
   
 - `~/.reviewer2_config`  
 
-  Most settings that can be provided on the command line can optionally be set via this YAML config file instead.
+  Most settings that can be provided on the command line can also be set via this YAML config file instead.
   
   
 For more details, run:   
