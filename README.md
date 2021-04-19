@@ -89,7 +89,8 @@ For example:
 python3 -m compare_form_response_tables egor_reviewer2_form_responses.tsv  ben_reviewer2_form_responses.tsv -o combined_responses.tsv -s1 egor -s2 ben
 ```
 
-This script will print concordance stats, and output a `combined_responses.tsv` table that contains one image per row and each person's review of the image.  
+This script will print concordance stats, and output a `combined_responses.tsv` table that contains one image per row as well as each person's review of the image.  
+  
 To see the full list of args and descriptions, run `python3 -m compare_form_response_tables --help`
 
 ### Development:
