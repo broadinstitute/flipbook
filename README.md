@@ -45,7 +45,7 @@ python3 -m reviewer2 -m /path/metadata.tsv          #  provide a metadata table
 
 After the server is running, open your web browser to [http://localhost:8080](http://localhost:8080) to start reviewing images.
 
-### Optional Inputs:
+### Optional Args:
 
 - responses table (`-t`)
 
