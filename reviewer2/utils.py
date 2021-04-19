@@ -1,48 +1,59 @@
 import collections
-import glob
 from jinja2 import Template
 import json
 import os
 import pandas as pd
 import pkg_resources
+from wcmatch import glob
 
 METADATA_FILENAME = "reviewer2_metadata.json"
 
 
-def get_relative_directory_to_image_files_list(top_level_dir, keywords_to_exclude, verbose=False):
+def get_relative_directory_to_image_files_list(
+    top_level_dir,
+    keywords_to_exclude,
+    suffixes=("svg", "png", "jpeg", "jpg", "gif", "webp"),
+    verbose=False):
     image_paths = []
-    for suffix in "svg", "png", "jpeg", "jpg", "gif", "webp":
-        glob_string = os.path.join(top_level_dir, f"**/*.{suffix}")
-        matching_paths = glob.glob(glob_string, recursive=True)
-        print(f"Found {len(matching_paths)} paths matching {glob_string}", )
-        image_paths += matching_paths
+
+    print(f"Looking for " + ", ".join(suffixes[:-1]) + f", or {suffixes[-1]} images in {top_level_dir}")
+    glob_string = "|".join([os.path.join(top_level_dir, f"**/*.{suffix}") for suffix in suffixes])
+    matching_paths = glob.glob(glob_string, flags=glob.GLOBSTAR|glob.SPLIT)
+    image_paths += matching_paths
 
     # group images by their directory
+    image_counter_by_suffix = collections.defaultdict(int)
     relative_directory_to_image_files = collections.defaultdict(list)
     excluded_keyword_to_matching_paths = collections.defaultdict(list)
     for image_path in image_paths:
         image_path = os.path.realpath(image_path)
+        image_suffix = image_path.split(".")[-1]
+        if image_suffix not in suffixes:
+            raise Exception(f"Unexpected file suffix: {image_suffix}")
+        image_counter_by_suffix[image_suffix] += 1
         relative_image_path = os.path.relpath(image_path, top_level_dir)
-        if keywords_to_exclude:
-            skip_this_path = False
-            for keyword_to_exclude in keywords_to_exclude:
-                if keyword_to_exclude in relative_image_path:
-                    excluded_keyword_to_matching_paths[keyword_to_exclude].append(relative_image_path)
-                    if verbose:
-                        print(f"Skipping {relative_image_path} - it contains excluded keyword: '{keyword_to_exclude}'")
-                    skip_this_path = True
-                    break
-            if skip_this_path:
-                continue
+        excluded_keyword_matches = [k for k in keywords_to_exclude if k in relative_image_path] if keywords_to_exclude else []
+        if excluded_keyword_matches:
+            excluded_keyword_to_matching_paths[excluded_keyword_matches[0]].append(relative_image_path)
+            if verbose:
+                print(f"Skipping {image_suffix} image: {relative_image_path} - it contains excluded keyword: '{excluded_keyword_matches[0]}'")
+            continue
+        else:
+            if verbose:
+                print(f"{image_suffix} image: {relative_image_path}")
 
         key = os.path.dirname(relative_image_path)
         if not key or key == ".":
             key = relative_image_path
         relative_directory_to_image_files[key].append(relative_image_path)
 
-    print(f"Found {len(image_paths)} images in {len(relative_directory_to_image_files)} directories")
+    image_counter_string = " and ".join([f"{c} {suffix} images" for suffix, c in image_counter_by_suffix.items()])
+    print(f"Found {image_counter_string}" + (
+        f" in {len(relative_directory_to_image_files)} sub-directories" if len(relative_directory_to_image_files) > 1 else ""
+    ))
+
     for excluded_keyword, matching_paths in excluded_keyword_to_matching_paths.items():
-        print(f"Skipped {len(matching_paths)} paths with excluded keyword: '{keyword_to_exclude}'")
+        print(f"Skipped {len(matching_paths)} image paths which contained excluded keyword: '{excluded_keyword}'")
 
     relative_directory_to_image_files_list = list(sorted(relative_directory_to_image_files.items()))
 
@@ -75,7 +86,8 @@ def get_relative_directory_to_metadata(top_level_dir, relative_directory_to_imag
             for key in metadata_json:
                 metadata_columns[key] = None
 
-    print(f"Parsed {len(relative_directory_to_metadata)} {METADATA_FILENAME} files with columns: {', '.join(metadata_columns)}")
+    print(f"Found {len(relative_directory_to_metadata)} {METADATA_FILENAME} files" + (
+        f" with columns: {', '.join(metadata_columns)}" if metadata_columns else ""))
 
     return list(metadata_columns.keys()), relative_directory_to_metadata
 

@@ -39,7 +39,7 @@
     </style>
 </head>
 <body style="overflow-x: scroll">
-    {% set tabindex = 0 %}
+    {% set tabindex = 1000 %}
     <div class="ui stackable grid" style="margin-top: 1px">
         <div class="row">
             <div class="one wide column"></div>
@@ -67,7 +67,7 @@
                             <span style="margin-left: 30px">
                                 <a id="homelink" href="/" style="white-space: nowrap">
                                     <i class="home icon"></i> &nbsp; table
-                                    <span style="margin-left: 10px" class="keyboard-shortcut">h or t</span>
+                                    <!-- span style="margin-left: 10px" class="keyboard-shortcut">h or t</span -->
                                 </a>
                             </span>
                         </div>
@@ -133,6 +133,7 @@
                         </div>
                     </form>
                 {% endif %}
+                {% set tabindex = 1 %}
                 {% for image_path in image_paths %}
                     <div class="ui divider"></div>
                     <div style="margin: 10px"><b>{{ image_path }}</b></div>
@@ -194,21 +195,32 @@
       //$('form .submit.button').api(apiSpec)
 
       //keyboard shortcuts
+      const navigationKeyToSelectorMap = {
+        "[": "#prevlink",
+        "<": "#prevlink",
+        "p": "#prevlink",
+        "P": "#prevlink",
+        "%": "#prevlink",  // left arrow ("%" == String.fromCharCode(37))
+        "]": "#nextlink",
+        ">": "#nextlink",
+        "n": "#nextlink",
+        "N": "#nextlink",
+        "'": "#nextlink",  // right arrow ("'" == String.fromCharCode(39))
+        //"h": "#homelink",
+        //"t": "#homelink",
+      }
+
+      const formKeyToSelectorMap = {}
+      {% for key, value in form_radio_button_keyboard_shortcuts.items() %}
+      formKeyToSelectorMap["{{key}}"] = "input[value='{{ value }}']"
+      {% endfor %}
+
+      const keyToSelectorMap = Object.assign({}, formKeyToSelectorMap, navigationKeyToSelectorMap)
+
       $(document).keypress((event) => {
+        //console.log(event.target.tagName, event.target.type, ": key", String.fromCharCode(event.keyCode), " (", event.keyCode, ") pressed")
         if ((event.target.tagName || '').toLowerCase() == 'input' && event.target.type == 'text') {
             return
-        }
-        const keyToSelectorMap = {
-          '[': "#prevlink",
-          '<': "#prevlink",
-          'p': "#prevlink",
-          'P': "#prevlink",
-          ']': "#nextlink",
-          '>': "#nextlink",
-          'n': "#nextlink",
-          'N': "#nextlink",
-          'h': "#homelink",
-          't': "#homelink",
         }
         const key = String.fromCharCode(event.keyCode)
         const selector = keyToSelectorMap[key]
@@ -217,6 +229,34 @@
             if (obj.length > 0) {
               obj[0].click()
             }
+        }
+      })
+      //handle arrow keys
+      $(document).keydown((event) => {
+        //console.log(event.target.tagName, event.target.type, ": key", String.fromCharCode(event.keyCode), " (", event.keyCode, ") down")
+        if ((event.target.tagName || '').toLowerCase() == 'input') {
+            if (event.target.type == 'text') {
+                return
+            }
+        }
+
+        const key = String.fromCharCode(event.keyCode)
+        if (/[a-zA-Z0-9-_ ]/.test(key) && !(key.toLowerCase() in keyToSelectorMap) && !(key.toUpperCase() in keyToSelectorMap)) {
+            $("input[type=text]").focus()
+        }
+
+        switch (event.keyCode) {
+          case 37:
+            $('#prevlink')[0].click()
+            break
+          case 39:
+            $('#nextlink')[0].click()
+            break
+        }
+
+        // prevent arrow keys from selecting radio buttons
+        if (event.keyCode >= 37 && event.keyCode <= 40 && (event.target.tagName || '').toLowerCase() == 'input' && event.target.type == 'radio') {
+          return false
         }
       })
     </script>

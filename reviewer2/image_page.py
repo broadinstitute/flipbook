@@ -1,6 +1,7 @@
 from flask import request, Response
 
-from reviewer2 import args, RELATIVE_DIRECTORY_TO_IMAGE_FILES_LIST, FORM_SCHEMA, FORM_RESPONSES, RELATIVE_DIRECTORY_TO_METADATA
+from reviewer2 import args, RELATIVE_DIRECTORY_TO_IMAGE_FILES_LIST, FORM_SCHEMA, FORM_RESPONSES, \
+    RELATIVE_DIRECTORY_TO_METADATA, FORM_RADIO_BUTTON_KEYBOARD_SHORTCUTS
 from reviewer2.utils import load_jinja_template, get_image_page_url
 
 IMAGE_PAGE_TEMPLATE = None
@@ -46,6 +47,7 @@ def image_page_handler():
         metadata_json=RELATIVE_DIRECTORY_TO_METADATA.get(relative_dir, {}),
         get_image_page_url=get_image_page_url,
         form_schema=FORM_SCHEMA,
+        form_radio_button_keyboard_shortcuts=FORM_RADIO_BUTTON_KEYBOARD_SHORTCUTS,
         form_responses=FORM_RESPONSES.get(relative_dir, {}),
     )
 

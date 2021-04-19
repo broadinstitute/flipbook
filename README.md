@@ -36,7 +36,7 @@ python3 -m reviewer2    # start server for all images in the current directory a
 Below are more examples (all args are optional). Run it with `--help` to see the full list of args and descriptions.
 
 ```
-python3 -m reviewer2 -x temp -x keyword2 -d /path/dir-with-images    #  -x are keyword(s) of paths to skip    -d is the top level dir to search instead of the current dir
+python3 -m reviewer2 -x temp -x keyword2  /path/dir-with-images    #  -x are keyword(s) of paths to skip and /path/dir-with-images is the top level dir to search instead of the current dir
 
 python3 -m reviewer2 -t /path/user_responses.xls    #  change where user responses get saved (default: reviewer2_form_responses.tsv)
 
@@ -100,5 +100,5 @@ git clone git@github.com:broadinstitute/reviewer2.git
 cd reviewer2
 
 # start server in dev mode so it reloads code on change
-python3 -m reviewer2 -d /path/dir-with-images --dev-mode
+python3 -m reviewer2 /path/dir-with-images --dev-mode
 ```

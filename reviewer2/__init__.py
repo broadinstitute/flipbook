@@ -3,6 +3,7 @@ import configargparse
 import json
 import os
 import pandas as pd
+import re
 from reviewer2.utils import get_relative_directory_to_image_files_list, get_relative_directory_to_metadata, parse_table, \
     is_excel_table
 
@@ -13,13 +14,9 @@ p = configargparse.ArgumentParser(
     config_file_parser_class=configargparse.YAMLConfigFileParser,
     default_config_files=["~/.reviewer2_config"],
 )
-p.add_argument("-d", "--directory", default=".", help="Top-level directory to search for images")
-p.add_argument("-x", "--exclude-file-keyword", action="append", help="Skip images whose path (relative to -d) "
-                                                                     "contains this keyword")
-
+p.add_argument("-x", "--exclude-file-keyword", action="append", help="Skip images whose path contains this keyword")
 p.add_argument("-t", "--form-responses-table", default="reviewer2_form_responses.tsv",
-               help="The .tsv or .xls path where form responses are saved. If the path is relative, it will "
-                    "be treated as relative to the directory specified by --directory. If the file already exists,"
+               help="The .tsv or .xls path where form responses are saved. If the file already exists,"
                     "it will be parsed for previous form responses and then updated as the user fills in the form(s)."
                     "If the file doesn't exist, it will be created after the 1st form response.")
 p.add_argument("-m", "--metadata-table", default="reviewer2_metadata.tsv",
@@ -43,6 +40,7 @@ p.add_argument("--host", default="127.0.0.1", env_var="HOST", help="Listen for c
 p.add_argument("--port", default="8080", env_var="PORT", help="Listen for connections on this port")
 p.add_argument("--dev-mode", action="store_true", env_var="DEV", help="Run server in developer mode so it reloads "
                "html templates and source code if they're changed")
+p.add_argument("directory", default=".", nargs="?", help="Top-level directory to search for images")
 args = p.parse_args()
 
 if not os.path.isdir(args.directory):
@@ -138,7 +136,8 @@ if args.form_schema_json and os.path.isfile(args.form_schema_json):
 
 FORM_SCHEMA_COLUMNS = [r['columnName'] for r in FORM_SCHEMA]
 
-# validate FORM_SCHEMA
+# validate FORM_SCHEMA and determine keyboad shortcuts
+FORM_RADIO_BUTTON_KEYBOARD_SHORTCUTS = {}
 for i, form_schema_row in enumerate(FORM_SCHEMA):
     if not isinstance(form_schema_row, dict):
         raise ValueError(f"FORM_SCHEMA row {i} must be a dictionary")
@@ -162,6 +161,10 @@ for i, form_schema_row in enumerate(FORM_SCHEMA):
             missing_keys = {'value', 'label'} - set(choice.keys())
             if missing_keys:
                 raise ValueError(f"FORM_SCHEMA row {i} 'choices' list has entries where these keys are missing: {', '.join(missing_keys)}")
+
+            label_without_html = re.sub("<[^<]+?>", "", choice['label']).strip()
+            first_letter = (label_without_html or choice["value"])[0]
+            FORM_RADIO_BUTTON_KEYBOARD_SHORTCUTS[first_letter] = choice['value']
 
 
 # parse or create FORM_RESPONSES dict for storing user responses
