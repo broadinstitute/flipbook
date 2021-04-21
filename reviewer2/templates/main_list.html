@@ -39,9 +39,9 @@
             <div class="fourteen wide column">
                 <div style="font-size: 12pt">
                     {% if form_column_names %}
-                        <b>{{ form_responses_dict|length }} out of {{ image_files_list|length }} rows</b> currently have entries in {{ form_responses_table_path }}
+                        <b>{{ form_responses_dict|length }} out of {{ data_files_list|length }} rows</b> currently have entries in {{ form_responses_table_path }}
                     {% else %}
-                        {{ image_files_list|length }} rows to review
+                        {{ data_files_list|length }} rows to review
                     {% endif %}
                 </div>
                 <div class="ui divider"></div>
@@ -63,7 +63,7 @@
                                 {% endfor %}
                             </tr>
                         </thead>
-                        {% for page_number, relative_directory, filenames in image_files_list %}
+                        {% for page_number, relative_directory, filenames in data_files_list %}
                             <tr>
                                 {% if page_number < 10 %}
                                     <td><span class="keyboard-shortcut">{{ page_number }}</span></td>
@@ -71,7 +71,7 @@
                                     <td>{{ page_number }}.</td>
                                 {% endif %}
                                 <td style="padding-right: 50px;">
-                                    <a id="link{{page_number}}" href="{{ get_image_page_url(page_number, image_files_list | length) }}">
+                                    <a id="link{{page_number}}" href="{{ get_data_page_url(page_number, data_files_list | length) }}">
                                         {{relative_directory or filenames[0]}}
                                     </a>
                                 </td>
@@ -116,7 +116,7 @@
       //keyboard shortcuts
       $(document).keypress((event) => {
         const key = parseInt(String.fromCharCode(event.keyCode))
-        if (key > 0 && key < 10 && key <= parseInt("{{ image_files_list|length }}")) {
+        if (key > 0 && key < 10 && key <= parseInt("{{ data_files_list|length }}")) {
           $("#link" + key)[0].click();
         }
       })

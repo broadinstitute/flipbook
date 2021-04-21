@@ -4,7 +4,7 @@ import json
 import os
 import pandas as pd
 import re
-from reviewer2.utils import get_relative_directory_to_image_files_list, get_relative_directory_to_metadata, parse_table, \
+from reviewer2.utils import get_relative_directory_to_data_files_list, get_relative_directory_to_metadata, parse_table, \
     is_excel_table
 
 p = configargparse.ArgumentParser(
@@ -14,20 +14,21 @@ p = configargparse.ArgumentParser(
     config_file_parser_class=configargparse.YAMLConfigFileParser,
     default_config_files=["~/.reviewer2_config"],
 )
-p.add_argument("-x", "--exclude-file-keyword", action="append", help="Skip images whose path contains this keyword")
+p.add_argument("-x", "--exclude-file-keyword", action="append", help="Skip files whose path contains this keyword")
 p.add_argument("-t", "--form-responses-table", default="reviewer2_form_responses.tsv",
                help="The .tsv or .xls path where form responses are saved. If the file already exists,"
                     "it will be parsed for previous form responses and then updated as the user fills in the form(s)."
                     "If the file doesn't exist, it will be created after the 1st form response.")
 p.add_argument("-m", "--metadata-table", default="reviewer2_metadata.tsv",
-               help="The .tsv or .xls path containing metadata to show on image pages. There are two optional ways "
-                    "to add metadata to the image pages. The 1st way is to put a 'reviewer2_metadata.json' file "
-                    "in each directory that contains image files (in which case any  key-value pairs from the json "
-                    "file will be shown at the top of the image page). The other way is to specify this table, which "
-                    "needs to have a 'Path' column with relative directory paths that contain image files. The image "
-                    "page corresponding to those directory paths will then display values from the other columns in "
-                    "this table. If both this table and 'reviewer2_metadata.json' files are found, the values from "
-                    "this table will override values in the 'reviewer2_metadata.json' files.")
+               help="The .tsv or .xls path containing metadata to show on data pages. There are two optional ways "
+                    "to add metadata to the data pages. The 1st way is to put a 'reviewer2_metadata.json' file "
+                    "inside a directory that contains images or data files (in which case any key-value pairs from "
+                    "the json file will be shown at the top of the data page that displays those images). "
+                    "The other way is to specify this table, which needs to have a 'Path' column with relative "
+                    "directory paths that contain images and data files. The data page corresponding to those "
+                    "directory paths will then display values from the other columns in this table. If both this table "
+                    "and 'reviewer2_metadata.json' files are found, the values from this table will override values in "
+                    "the 'reviewer2_metadata.json' files.")
 p.add_argument("--form-schema-json", help="Path of .json file containing a custom form schema. For the expected format "
                     "see the FORM_SCHEMA value in https://github.com/broadinstitute/reviewer2/blob/main/reviewer2/__init__a.py")
 p.add_argument("-s", "--sort-by", action="append", help="Order pages by metadata column(s)")
@@ -40,7 +41,7 @@ p.add_argument("--host", default="127.0.0.1", env_var="HOST", help="Listen for c
 p.add_argument("--port", default="8080", env_var="PORT", help="Listen for connections on this port")
 p.add_argument("--dev-mode", action="store_true", env_var="DEV", help="Run server in developer mode so it reloads "
                "html templates and source code if they're changed")
-p.add_argument("directory", default=".", nargs="?", help="Top-level directory to search for images")
+p.add_argument("directory", default=".", nargs="?", help="Top-level directory to search for images and data files")
 args = p.parse_args()
 
 if not os.path.isdir(args.directory):
@@ -48,20 +49,20 @@ if not os.path.isdir(args.directory):
 
 args.directory = os.path.realpath(args.directory)
 
-# search directory for image files
-RELATIVE_DIRECTORY_TO_IMAGE_FILES_LIST = get_relative_directory_to_image_files_list(
+# search directory for images and data files
+RELATIVE_DIRECTORY_TO_DATA_FILES_LIST = get_relative_directory_to_data_files_list(
     args.directory,
     args.exclude_file_keyword,
     verbose=args.verbose)
 
-if not RELATIVE_DIRECTORY_TO_IMAGE_FILES_LIST:
-    p.error(f"No images found in {args.directory}")
+if not RELATIVE_DIRECTORY_TO_DATA_FILES_LIST:
+    p.error(f"No images or data files found in {args.directory}")
 
 
 # parse metadata from reviewer2_metadata.json files
 METADATA_COLUMNS, RELATIVE_DIRECTORY_TO_METADATA = get_relative_directory_to_metadata(
     args.directory,
-    RELATIVE_DIRECTORY_TO_IMAGE_FILES_LIST,
+    RELATIVE_DIRECTORY_TO_DATA_FILES_LIST,
     verbose=args.verbose)
 
 
@@ -96,9 +97,9 @@ if METADATA_COLUMNS and args.sort_by:
 
     print(f"Sorting pages by {', '.join(args.sort_by)}")
     get_sort_key = lambda i: tuple([str(RELATIVE_DIRECTORY_TO_METADATA.get(i[0], {}).get(s)) for s in args.sort_by])
-    RELATIVE_DIRECTORY_TO_IMAGE_FILES_LIST = sorted(RELATIVE_DIRECTORY_TO_IMAGE_FILES_LIST, key=get_sort_key)
+    RELATIVE_DIRECTORY_TO_DATA_FILES_LIST = sorted(RELATIVE_DIRECTORY_TO_DATA_FILES_LIST, key=get_sort_key)
 
-# define input form fields to show on each image page
+# define input form fields to show on each data page
 FORM_SCHEMA = [
     {
         'type': 'radio',

@@ -1,8 +1,8 @@
 from flask import request, Response
 
-from reviewer2 import args, RELATIVE_DIRECTORY_TO_IMAGE_FILES_LIST, FORM_RESPONSES, FORM_SCHEMA_COLUMNS, \
+from reviewer2 import args, RELATIVE_DIRECTORY_TO_DATA_FILES_LIST, FORM_RESPONSES, FORM_SCHEMA_COLUMNS, \
     RELATIVE_DIRECTORY_TO_METADATA, METADATA_COLUMNS
-from reviewer2.utils import load_jinja_template, get_image_page_url
+from reviewer2.utils import load_jinja_template, get_data_page_url
 
 MAIN_LIST_TEMPLATE = None
 
@@ -15,14 +15,14 @@ def main_list_handler():
     if args.verbose:
         print(f"main_list_handler recieved {request.url}")
 
-    image_files_list = [
-        (page_number + 1, relative_directory, filenames)
-        for page_number, (relative_directory, filenames) in enumerate(RELATIVE_DIRECTORY_TO_IMAGE_FILES_LIST)
+    data_files_list = [
+        (page_number + 1, relative_directory, data_file_types_and_paths)
+        for page_number, (relative_directory, data_file_types_and_paths) in enumerate(RELATIVE_DIRECTORY_TO_DATA_FILES_LIST)
     ]
 
     html = MAIN_LIST_TEMPLATE.render(
-        image_files_list=image_files_list,
-        get_image_page_url=get_image_page_url,
+        data_files_list=data_files_list,
+        get_data_page_url=get_data_page_url,
         form_column_names=FORM_SCHEMA_COLUMNS,
         form_responses_dict=FORM_RESPONSES,
         metadata_column_names=METADATA_COLUMNS if not args.hide_metadata_on_home_page else [],
