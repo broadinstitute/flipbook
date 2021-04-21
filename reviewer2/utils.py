@@ -79,7 +79,7 @@ def get_relative_directory_to_data_files_list(
 def get_relative_directory_to_metadata(top_level_dir, relative_directory_to_data_files_list, verbose=False):
     metadata_columns = collections.OrderedDict()
     relative_directory_to_metadata = {}
-    # if it exists, parse the reviewer2_metadata.json file from each directory
+    # parse the reviewer2_metadata.json file from each directory
     for relative_dir, data_files_list in relative_directory_to_data_files_list:
         for data_file_type, data_file_path in data_files_list:
             if data_file_type != METADATA_JSON_FILE_TYPE:
@@ -105,7 +105,7 @@ def get_relative_directory_to_metadata(top_level_dir, relative_directory_to_data
             for key in metadata_json:
                 metadata_columns[key] = None
 
-    print(f"Found {len(relative_directory_to_metadata)} {METADATA_JSON_FILE_SUFFIX} files" + (
+    print(f"Parsed {len(relative_directory_to_metadata)} {METADATA_JSON_FILE_SUFFIX} files" + (
         f" with columns: {', '.join(metadata_columns)}" if metadata_columns else ""))
 
     return list(metadata_columns.keys()), relative_directory_to_metadata
