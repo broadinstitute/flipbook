@@ -85,7 +85,7 @@ def get_relative_directory_to_metadata(top_level_dir, relative_directory_to_data
             if data_file_type != METADATA_JSON_FILE_TYPE:
                 continue
 
-            metadata_json_path = os.path.join(top_level_dir, relative_dir, data_file_path)
+            metadata_json_path = os.path.join(top_level_dir, data_file_path)
             try:
                 with open(metadata_json_path, "rt") as f:
                     metadata_json = json.load(f)
@@ -98,7 +98,7 @@ def get_relative_directory_to_metadata(top_level_dir, relative_directory_to_data
                 continue
 
             if verbose:
-                print(f"Parsed {len(metadata_json)} metadata entries from {metadata_json_path}") # Keys: {', '.join(metadata_json.keys())}
+                print(f"Parsed {len(metadata_json)} metadata entries from {metadata_json_path}")
 
             relative_directory_to_metadata[relative_dir] = metadata_json
 
