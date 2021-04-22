@@ -39,7 +39,8 @@
     </style>
 </head>
 <body style="overflow-x: scroll">
-    {% set tabindex = 1000 %}
+    {% set tabindex = namespace(value=1000) %}
+    <a name="top"></a>
     <div class="ui stackable grid" style="margin-top: 1px">
         <div class="row">
             <div class="one wide column"></div>
@@ -74,12 +75,23 @@
                         <div class="four wide column" style="text-align:center">
                             <b>page #{{ i }} of {{ last }}: &nbsp; {{ relative_directory }}</b>
                         </div>
-                        <div class="six wide column"></div>
+                        <div class="six wide column">
+                            {% set all_sections = image_file_paths|list + content_html_strings|list %}
+                            {% if all_sections|length > 1 %}
+                            <div style="float: right">
+                                {% for _ in all_sections %}
+                                    <a href="#section{{ loop.index }}">
+                                        section{{ loop.index }}
+                                    </a>{% if loop.index < all_sections|length %}, &nbsp; {% endif %}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
-                {% if metadata_json|length > 0 %}
+                {% if metadata_json_dict|length > 0 %}
                     <div class="ui divider"></div>
-                    {% for key, value in metadata_json.items() %}
+                    {% for key, value in metadata_json_dict.items() %}
                         <div style="margin-left: 10px; display: inline-block"><b>{{ key }}</b>: {{ value }}</div>
                     {% endfor %}
                 {% endif %}
@@ -88,10 +100,10 @@
                     <form class="ui form" onsubmit="return false">
                         <input type="hidden" name="relative_directory" value="{{ relative_directory }}" />
                         <div class="inline fields" style="white-space: nowrap">
-                            {% set is_first_iter = True %}
+                            {% set is_first_iter = namespace(value=True) %}
                             {% for form_schema_row in form_schema %}
                                 {% if form_schema_row["type"] == "radio" %}
-                                    <label for="{{ form_schema_row['name'] }}" style="margin-left: {{ 10 if is_first_iter else 35 }}px">
+                                    <label for="{{ form_schema_row['name'] }}" style="margin-left: {{ 10 if is_first_iter.value else 35 }}px">
                                         {{ form_schema_row['inputLabel'] }}
                                     </label>
                                     {% for choice in form_schema_row['choices'] %}
@@ -101,14 +113,14 @@
                                                        name="{{ form_schema_row['name'] }}"
                                                        value="{{ choice['value'] }}"
                                                        class="hidden"
-                                                       tabindex="{{ tabindex }}"
+                                                       tabindex="{{ tabindex.value }}"
                                                        autofocus
                                                        {{ "checked" if form_responses.get(form_schema_row['columnName']) == choice['value'] else "" }}
                                                 >
                                                 <label>{{ choice['label'] }}</label>
                                             </div>
                                         </div>
-                                        {% set tabindex = tabindex + 1 %}
+                                        {% set tabindex.value = tabindex.value + 1 %}
                                     {% endfor %}
                                 {% elif form_schema_row["type"] == "text" %}
                                     <div class="field" style="margin-left: 35px">
@@ -117,13 +129,13 @@
                                                size="{{ form_schema_row.get('size', 100) }}"
                                                placeholder="{{ form_schema_row['columnName'] }}"
                                                value="{{ form_responses.get(form_schema_row['columnName']) or '' }}"
-                                               tabindex="{{ tabindex }}"
+                                               tabindex="{{ tabindex.value }}"
                                                autofocus
                                         >
                                     </div>
-                                    {% set tabindex = tabindex + 1 %}
+                                    {% set tabindex.value = tabindex.value + 1 %}
                                 {% endif %}
-                                {% set is_first_iter = False %}
+                                {% set is_first_iter.value = False %}
                             {% endfor %}
                             <div id="save-status" style="display:none">
                                 <i class="icon"></i>
@@ -133,21 +145,31 @@
                         </div>
                     </form>
                 {% endif %}
-                {% set tabindex = 1 %}
-                {% for data_file_type, data_file_path in data_file_types_and_paths %}
-                    {% if data_file_type == "image" %}
-                        <div class="ui divider"></div>
-                        <div style="margin: 10px"><b>{{ data_file_path }}</b></div>
-                        <img class="img-default-view" src="/{{ data_file_path }}" tabindex="{{ tabindex }}"/>
-                        {% set tabindex = tabindex + 1 %}
-                    {% endif %}
+                {% set tabindex = namespace(value=1) %}
+                {% set section_counter = namespace(value=1) %}
+                {% for image_file_path in image_file_paths %}
+                    <div class="ui divider"></div>
+                    <a name="section{{ section_counter.value }}"></a>
+                    <div style="margin: 10px">
+                        <b>{{ image_file_path }}</b>
+                        <span style="float:right">[<a href="#top">go to top</a>]</span>
+                    </div>
+
+                    <img class="img-default-view" src="/{{ image_file_path }}" tabindex="{{ tabindex.value }}"/>
+                    {% set tabindex.value = tabindex.value + 1 %}
+                    {% set section_counter.value = section_counter.value + 1 %}
                 {% endfor %}
-                {% for data_file_type, data_file_path in data_file_types_and_paths %}
-                    {% if data_file_type == "content_html" %}
-                        <div class="ui divider"></div>
-                        <div style="margin: 10px"><b>{{ data_file_path }}</b></div>
-                        {% inclue data_file_path %}
-                    {% endif %}
+                {% for name, content_html_string in content_html_strings %}
+                    <div class="ui divider"></div>
+                    <a name="section{{ section_counter.value }}"></a>
+                    <div style="margin: 10px">
+                        <b>{{ name }}</b>
+                        <span style="float: right">[<a href="#top">go to top</a>]</span>
+                    </div>
+                    <div style="margin: 10px">
+                        {{ content_html_string }}
+                    </div>
+                    {% set section_counter.value = section_counter.value + 1 %}
                 {% endfor %}
             </div>
             <div class="one wide column"></div>

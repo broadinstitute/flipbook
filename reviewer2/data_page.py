@@ -2,7 +2,7 @@ from flask import request, Response
 
 from reviewer2 import args, RELATIVE_DIRECTORY_TO_DATA_FILES_LIST, FORM_SCHEMA, FORM_RESPONSES, \
     RELATIVE_DIRECTORY_TO_METADATA, FORM_RADIO_BUTTON_KEYBOARD_SHORTCUTS
-from reviewer2.utils import load_jinja_template, get_data_page_url
+from reviewer2.utils import load_jinja_template, get_data_page_url, CONTENT_HTML_FILE_TYPE, IMAGE_FILE_TYPE
 
 DATA_PAGE_TEMPLATE = None
 
@@ -39,12 +39,28 @@ def data_page_handler():
 
     relative_dir, data_file_types_and_paths = RELATIVE_DIRECTORY_TO_DATA_FILES_LIST[i - 1]
 
+    image_file_paths = []
+    for data_file_type, data_file_path in data_file_types_and_paths:
+        if data_file_type == IMAGE_FILE_TYPE:
+            image_file_paths.append(data_file_path)
+
+    metadata_json_dict = RELATIVE_DIRECTORY_TO_METADATA.get(relative_dir, {})
+
+    content_html_strings = []
+    for data_file_type, data_file_path in data_file_types_and_paths:
+        if data_file_type != CONTENT_HTML_FILE_TYPE:
+            continue
+        with open(data_file_path, "rt") as f:
+            content_string = f.read()
+            content_html_strings.append((data_file_path, content_string))
+
     html = DATA_PAGE_TEMPLATE.render(
         i=i,
         last=last,
         relative_directory=relative_dir,
-        data_file_types_and_paths=data_file_types_and_paths,
-        metadata_json=RELATIVE_DIRECTORY_TO_METADATA.get(relative_dir, {}),
+        image_file_paths=image_file_paths,
+        metadata_json_dict=metadata_json_dict,
+        content_html_strings=content_html_strings,
         get_data_page_url=get_data_page_url,
         form_schema=FORM_SCHEMA,
         form_radio_button_keyboard_shortcuts=FORM_RADIO_BUTTON_KEYBOARD_SHORTCUTS,

@@ -38,6 +38,7 @@ def get_relative_directory_to_data_files_list(
                 break
         else:
             raise Exception(f"Unexpected file suffix: {data_file_path}")
+
         data_file_counter_by_suffix[data_file_suffix] += 1
         relative_data_file_path = os.path.relpath(data_file_path, top_level_dir)
         excluded_keyword_matches = [k for k in keywords_to_exclude if k in relative_data_file_path] if keywords_to_exclude else []
@@ -63,7 +64,12 @@ def get_relative_directory_to_data_files_list(
 
         relative_directory_to_data_files[key].append((data_file_type, relative_data_file_path))
 
-    data_file_counter_string = " and ".join([f"{c} {suffix} files" for suffix, c in data_file_counter_by_suffix.items()])
+    data_file_counter_string = ", ".join([
+        ("" if i < len(data_file_counter_by_suffix) - 1 else "and ") +
+        f"{counter} {suffix} file" +
+        ("s" if counter > 1 else "")
+        for i, (suffix, counter) in enumerate(data_file_counter_by_suffix.items())
+    ])
     print(f"Found {data_file_counter_string}" + (
         f" in {len(relative_directory_to_data_files)} sub-directories" if len(relative_directory_to_data_files) > 1 else ""
     ))
