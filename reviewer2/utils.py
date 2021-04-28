@@ -65,7 +65,7 @@ def get_relative_directory_to_data_files_list(
         relative_directory_to_data_files[key].append((data_file_type, relative_data_file_path))
 
     data_file_counter_string = ", ".join([
-        ("" if i < len(data_file_counter_by_suffix) - 1 else "and ") +
+        ("" if i < len(data_file_counter_by_suffix) - 1 or len(data_file_counter_by_suffix) < 2 else "and ") +
         f"{counter} {suffix} file" +
         ("s" if counter > 1 else "")
         for i, (suffix, counter) in enumerate(data_file_counter_by_suffix.items())
@@ -111,8 +111,9 @@ def get_relative_directory_to_metadata(top_level_dir, relative_directory_to_data
             for key in metadata_json:
                 metadata_columns[key] = None
 
-    print(f"Parsed {len(relative_directory_to_metadata)} {METADATA_JSON_FILE_SUFFIX} files" + (
-        f" with columns: {', '.join(metadata_columns)}" if metadata_columns else ""))
+    if relative_directory_to_metadata:
+        print(f"Parsed {len(relative_directory_to_metadata)} {METADATA_JSON_FILE_SUFFIX} files" + (
+            f" with columns: {', '.join(metadata_columns)}" if metadata_columns else ""))
 
     return list(metadata_columns.keys()), relative_directory_to_metadata
 
