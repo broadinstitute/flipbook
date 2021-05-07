@@ -47,7 +47,7 @@
             <div class="fourteen wide column">
                 <div class="ui stackable grid">
                     <div class="row">
-                        <div class="three wide column" style="white-space: nowrap">
+                        <div class="three wide column" style="white-space: nowrap; min-width: 220px">
                             <a id="prevlink"
                                href="{{ get_data_page_url(i - 1, last) if i > 1  else '#' }}"
                                class="{{ '' if i > 1  else 'disabled-link' }}"
@@ -250,6 +250,9 @@
 
       $(document).keypress((event) => {
         //console.log(event.target.tagName, event.target.type, ": key", String.fromCharCode(event.keyCode), " (", event.keyCode, ") pressed")
+        if (event.metaKey || event.ctrlKey) {
+            return
+        }
         if ((event.target.tagName || '').toLowerCase() == 'input' && event.target.type == 'text') {
             return
         }
@@ -265,6 +268,9 @@
       //handle arrow keys
       $(document).keydown((event) => {
         //console.log(event.target.tagName, event.target.type, ": key", String.fromCharCode(event.keyCode), " (", event.keyCode, ") down")
+        if (event.metaKey || event.ctrlKey) {
+            return
+        }
         if ((event.target.tagName || '').toLowerCase() == 'input') {
             if (event.target.type == 'text') {
                 return
