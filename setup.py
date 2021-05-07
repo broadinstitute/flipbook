@@ -20,6 +20,8 @@ install_requires = [
     "gunicorn",
     "jinja2",
     "openpyxl",
+    "xlrd",
+    "xlwt",
     "pandas",
     "wcmatch",
 ]
