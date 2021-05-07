@@ -82,7 +82,7 @@
                                 {% for _ in all_sections %}
                                     <a href="#section{{ loop.index }}">
                                         section{{ loop.index }}
-                                    </a>{% if loop.index < all_sections|length %}, &nbsp; {% endif %}
+                                    </a>{% if not loop.last %}, &nbsp; {% endif %}
                                 {% endfor %}
                             </div>
                             {% endif %}
@@ -152,7 +152,9 @@
                     <a name="section{{ section_counter.value }}"></a>
                     <div style="margin: 10px">
                         <b>{{ image_file_path }}</b>
-                        <span style="float:right">[<a href="#top">go to top</a>]</span>
+                        {% if section_counter.value > 1 %}
+                            <span style="float:right">[<a href="#top">go to top</a>]</span>
+                        {% endif %}
                     </div>
 
                     <img class="img-default-view" src="/{{ image_file_path }}" tabindex="{{ tabindex.value }}"/>
@@ -164,7 +166,9 @@
                     <a name="section{{ section_counter.value }}"></a>
                     <div style="margin: 10px">
                         <b>{{ name }}</b>
-                        <span style="float: right">[<a href="#top">go to top</a>]</span>
+                        {% if section_counter.value > 1 %}
+                            <span style="float: right">[<a href="#top">go to top</a>]</span>
+                        {% endif %}
                     </div>
                     <div style="margin: 10px">
                         {{ content_html_string }}

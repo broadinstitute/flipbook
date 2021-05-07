@@ -1,5 +1,5 @@
 from flask import request, Response
-
+from pprint import pprint, pformat
 from reviewer2 import args, RELATIVE_DIRECTORY_TO_DATA_FILES_LIST, FORM_SCHEMA, FORM_RESPONSES, \
     RELATIVE_DIRECTORY_TO_METADATA, FORM_RADIO_BUTTON_KEYBOARD_SHORTCUTS
 from reviewer2.utils import load_jinja_template, get_data_page_url, CONTENT_HTML_FILE_TYPE, IMAGE_FILE_TYPE
@@ -12,15 +12,24 @@ def data_page_handler():
     if DATA_PAGE_TEMPLATE is None or args.dev_mode:
         DATA_PAGE_TEMPLATE = load_jinja_template("data_page")
 
+    if args.verbose:
+        print(f"data_page_handler received {request.url}")
+
     params = {}
     if request.values:
         params.update(request.values)
 
-    if args.verbose:
-        print(f"data_page_handler received {request.url}")
-
     if 'i' not in params:
         params.update(request.get_json(force=True, silent=True) or {})
+
+    if args.verbose > 1:
+        print(f"data_page_handler request.data: {pformat(request.data)}")
+        print(f"data_page_handler request.form: {pformat(request.form)}")
+        print(f"data_page_handler request.args: {pformat(request.args)}")
+        print(f"data_page_handler request.values: {pformat(request.values)}")
+        print(f"data_page_handler request.get_json(..): {pformat(request.get_json(force=True, silent=True))}")
+        print(f"data_page_handler request.__dict__: {pformat(request.__dict__)}")
+        print(f"data_page_handler params: {params}")
 
     i = params.get("i")
     try:

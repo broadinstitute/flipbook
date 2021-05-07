@@ -14,7 +14,9 @@ p = configargparse.ArgumentParser(
     config_file_parser_class=configargparse.YAMLConfigFileParser,
     default_config_files=["~/.reviewer2_config"],
 )
-p.add_argument("-x", "--exclude-file-keyword", action="append", help="Skip files whose path contains this keyword")
+p.add_argument("-i", "--include", action="append", help="Only include files whose path contains this keyword")
+p.add_argument("-x", "--exclude", action="append", help="Skip files whose path contains this keyword. If both "
+                    " --include and --exclude are specified, --exclude takes precedence over --include")
 p.add_argument("-t", "--form-responses-table", default="reviewer2_form_responses.tsv",
                help="The .tsv or .xls path where form responses are saved. If the file already exists,"
                     "it will be parsed for previous form responses and then updated as the user fills in the form(s)."
@@ -36,7 +38,7 @@ p.add_argument("--hide-metadata-on-home-page", action="store_true", help="Don't 
                "home page table")
 
 #p.add_argument("-c", "--config-file", help="Path of yaml config file", env_var="REVIEWER2_CONFIG_FILE")
-p.add_argument("-v", "--verbose", action="store_true", env_var="VERBOSE", help="Print more info")
+p.add_argument("-v", "--verbose", action='count', default=0, help="Print more info")
 p.add_argument("--host", default="127.0.0.1", env_var="HOST", help="Listen for connections on this hostname or IP")
 p.add_argument("--port", default="8080", env_var="PORT", help="Listen for connections on this port")
 p.add_argument("--dev-mode", action="store_true", env_var="DEV", help="Run server in developer mode so it reloads "
@@ -52,7 +54,8 @@ args.directory = os.path.realpath(args.directory)
 # search directory for images and data files
 RELATIVE_DIRECTORY_TO_DATA_FILES_LIST = get_relative_directory_to_data_files_list(
     args.directory,
-    args.exclude_file_keyword,
+    args.include,
+    args.exclude,
     verbose=args.verbose)
 
 if not RELATIVE_DIRECTORY_TO_DATA_FILES_LIST:

@@ -16,6 +16,7 @@ CONTENT_HTML_FILE_SUFFIX = "reviewer2_content.html"
 
 def get_relative_directory_to_data_files_list(
     top_level_dir,
+    keywords_to_include,
     keywords_to_exclude,
     suffixes=("svg", "png", "jpeg", "jpg", "gif", "webp", CONTENT_HTML_FILE_SUFFIX, METADATA_JSON_FILE_SUFFIX),
     verbose=False):
@@ -42,6 +43,14 @@ def get_relative_directory_to_data_files_list(
 
         data_file_counter_by_suffix[data_file_suffix] += 1
         relative_data_file_path = os.path.relpath(data_file_path, top_level_dir)
+
+        if keywords_to_include:
+            included_keyword_matches = [k for k in keywords_to_include if k in relative_data_file_path] if keywords_to_include else []
+            if not included_keyword_matches:
+                if verbose:
+                    print(f"Skipping {data_file_suffix} file: {relative_data_file_path} - it doesn't contain any --include keyword.")
+                continue
+
         excluded_keyword_matches = [k for k in keywords_to_exclude if k in relative_data_file_path] if keywords_to_exclude else []
         if excluded_keyword_matches:
             excluded_keyword_to_matching_paths[excluded_keyword_matches[0]].append(relative_data_file_path)
