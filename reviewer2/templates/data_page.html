@@ -249,7 +249,7 @@
       const keyToSelectorMap = Object.assign({}, formKeyToSelectorMap, navigationKeyToSelectorMap)
 
       $(document).keypress((event) => {
-        //console.log(event.target.tagName, event.target.type, ": key", String.fromCharCode(event.keyCode), " (", event.keyCode, ") pressed")
+        //console.warn(event.target.tagName, event.target.type, ": key", String.fromCharCode(event.keyCode), " (", event.keyCode, ") pressed")
         if (event.metaKey || event.ctrlKey) {
             return
         }
@@ -267,16 +267,19 @@
       })
       //handle arrow keys
       $(document).keydown((event) => {
-        //console.log(event.target.tagName, event.target.type, ": key", String.fromCharCode(event.keyCode), " (", event.keyCode, ") down")
-        if (event.metaKey || event.ctrlKey) {
+        //console.warn(event.target.tagName, event.target.type, ": key", String.fromCharCode(event.keyCode), " (", event.keyCode, ") down")
+        if (event.metaKey || event.ctrlKey || event.keyCode == 8) {
+            // trigger form save and return immediately for meta and delete keys. This enables expected behavior for Commmand-C, Command-V and similar shortcuts
+            $('form input[type=text]').api(Object.assign({}, apiSpec, {on: 'now'}))
             return
+        } else {
+            $('form input[type=text]').api(apiSpec)
         }
         if ((event.target.tagName || '').toLowerCase() == 'input') {
             if (event.target.type == 'text') {
                 return
             }
         }
-
         const key = String.fromCharCode(event.keyCode)
         if (/[a-zA-Z0-9-_ ]/.test(key) && !(key.toLowerCase() in keyToSelectorMap) && !(key.toUpperCase() in keyToSelectorMap)) {
             $("input[type=text]").focus()
