@@ -16,9 +16,9 @@ def data_page_handler():
         print(f"data_page_handler received {request.url}")
 
     params = {}
-    if request.args:
+    if dict(request.args):
         params.update(dict(request.args))
-    if request.values:
+    if dict(request.values):
         params.update(dict(request.values))
 
     json_args = request.get_json(force=True, silent=True)
