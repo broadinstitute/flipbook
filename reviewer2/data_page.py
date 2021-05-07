@@ -16,33 +16,36 @@ def data_page_handler():
         print(f"data_page_handler received {request.url}")
 
     params = {}
+    if request.args:
+        params.update(dict(request.args))
     if request.values:
-        params.update(request.values)
+        params.update(dict(request.values))
 
+    json_args = request.get_json(force=True, silent=True)
     if 'i' not in params:
-        params.update(request.get_json(force=True, silent=True) or {})
+        params.update(json_args or {})
 
     if args.verbose > 1:
         print(f"data_page_handler request.data: {pformat(request.data)}")
-        print(f"data_page_handler request.form: {pformat(request.form)}")
-        print(f"data_page_handler request.args: {pformat(request.args)}")
-        print(f"data_page_handler request.values: {pformat(request.values)}")
-        print(f"data_page_handler request.get_json(..): {pformat(request.get_json(force=True, silent=True))}")
+        print(f"data_page_handler request.form: {bool(request.form)} {pformat(request.form)}")
+        print(f"data_page_handler request.args: {bool(request.args)} {pformat(request.args)}")
+        print(f"data_page_handler request.values: {bool(request.values)} {pformat(request.values)}")
+        print(f"data_page_handler request.get_json(..): {bool(json_args)} {pformat(json_args)}")
         print(f"data_page_handler request.__dict__: {pformat(request.__dict__)}")
         print(f"data_page_handler params: {params}")
 
     i = params.get("i")
     try:
         i = int(i)
-    except (ValueError, TypeError):
-        print(f"ERROR: unable to parse parameter i: '{i}'. Setting it to 1.")
+    except (ValueError, TypeError) as e:
+        print(f"ERROR: unable to parse parameter i: '{i}': {type(e).__name__} {e}. Setting i = 1.")
         i = 1
 
     last = params.get("last", i)
     try:
         last = int(last)
-    except (ValueError, TypeError):
-        print(f"ERROR: unable to parse parameter 'last': '{last}'. Setting it to {i}.")
+    except (ValueError, TypeError) as e:
+        print(f"ERROR: unable to parse parameter 'last': '{last}': {type(e).__name__} {e}. Setting last = {i}.")
         last = i
 
     if last < 1:
