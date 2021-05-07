@@ -26,16 +26,29 @@ def data_page_handler():
     try:
         i = int(i)
     except (ValueError, TypeError):
+        print(f"ERROR: unable to parse parameter i: '{i}'. Setting it to 1.")
         i = 1
 
     last = params.get("last", i)
     try:
         last = int(last)
     except (ValueError, TypeError):
+        print(f"ERROR: unable to parse parameter 'last': '{last}'. Setting it to {i}.")
         last = i
 
-    if i < 1 or i > len(RELATIVE_DIRECTORY_TO_DATA_FILES_LIST):
+    if last < 1:
+        print(f"ERROR: parameter 'last' (= {last}) is less than 1. Resetting it to 1.")
+        last = 1
+
+    if i < 1:
+        print(f"ERROR: parameter i (= {i}) is less than 1. Resetting it to 1.")
         i = 1
+
+    if i > len(RELATIVE_DIRECTORY_TO_DATA_FILES_LIST):
+        print(f"ERROR: parameter i (= {i}) is greater than the # of pages "
+              f"(= {len(RELATIVE_DIRECTORY_TO_DATA_FILES_LIST)}). "
+              f"Resetting it to {len(RELATIVE_DIRECTORY_TO_DATA_FILES_LIST)}.")
+        i = len(RELATIVE_DIRECTORY_TO_DATA_FILES_LIST)
 
     relative_dir, data_file_types_and_paths = RELATIVE_DIRECTORY_TO_DATA_FILES_LIST[i - 1]
 
@@ -53,6 +66,11 @@ def data_page_handler():
         with open(data_file_path, "rt") as f:
             content_string = f.read()
             content_html_strings.append((data_file_path, content_string))
+
+    if args.verbose:
+        print(f"data_page_handler returning i={i}, last={last}, relative_directory={relative_dir}, "
+              f"{len(image_file_paths)} image_file_paths, {len(metadata_json_dict)} records in metadata_json_dict, "
+              f"{len(content_html_strings)} content_html_strings")
 
     html = DATA_PAGE_TEMPLATE.render(
         i=i,

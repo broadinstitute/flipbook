@@ -27,6 +27,7 @@ def get_relative_directory_to_data_files_list(
     data_file_paths += matching_paths
 
     # group data files by their directory
+    subdirectories_list = []
     data_file_counter_by_suffix = collections.defaultdict(int)
     relative_directory_to_data_files = collections.defaultdict(list)
     excluded_keyword_to_matching_paths = collections.defaultdict(list)
@@ -52,7 +53,9 @@ def get_relative_directory_to_data_files_list(
                 print(f"{data_file_suffix} file: {relative_data_file_path}")
 
         key = os.path.dirname(relative_data_file_path)
-        if not key or key == ".":
+        if key and key != ".":
+            subdirectories_list.append(key)
+        else:
             key = relative_data_file_path
 
         if data_file_suffix == METADATA_JSON_FILE_SUFFIX:
@@ -71,7 +74,7 @@ def get_relative_directory_to_data_files_list(
         for i, (suffix, counter) in enumerate(data_file_counter_by_suffix.items())
     ])
     print(f"Found {data_file_counter_string}" + (
-        f" in {len(relative_directory_to_data_files)} sub-directories" if len(relative_directory_to_data_files) > 1 else ""
+        f" in {len(subdirectories_list)} subdirectories" if len(subdirectories_list) > 1 else ""
     ))
 
     for excluded_keyword, matching_paths in excluded_keyword_to_matching_paths.items():
