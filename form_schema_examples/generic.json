@@ -1,0 +1,40 @@
+[
+  {
+    "type": "radio",
+    "columnName": "Q1",
+    "inputLabel": "Question1",
+    "choices": [
+      {"value": "slow", "label": "<i class='truck icon'></i>"},
+      {"value": "fast", "label": "<i class='shipping fast icon'></i>"}
+    ]
+  },
+  {
+    "type": "text",
+    "columnName": "Details",
+    "size": 10
+  },
+  {
+    "type": "radio",
+    "columnName": "Q2",
+    "inputLabel": "Question2",
+    "choices": [
+      {"value": "A1", "label": "Answer1"},
+      {"value": "A2", "label": "Answer2"}
+    ]
+  },
+  {
+    "type": "radio",
+    "columnName": "Q3",
+    "inputLabel": "Question3",
+    "choices": [
+      {"value": "A1", "label": "Answer1"},
+      {"value": "A2", "label": "Answer2"},
+      {"value": "A3", "label": "Answer3"}
+    ]
+  },
+  {
+    "type": "text",
+    "columnName": "More Details",
+    "size": 50
+  }
+]
