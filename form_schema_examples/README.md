@@ -1,5 +1,5 @@
 This folder contains example .json schema files which can be passed to reviewer2 using the `--form-schema-json` arg. 
-These modify the form that reviewer2 displays on the data page.  
+These modify the form that reviewer2 displays on the image page.  
 
 For example, [str_genotypes.json](https://github.com/broadinstitute/reviewer2/blob/main/form_schema_examples/str_genotypes.json)
 changes the form from the default:
