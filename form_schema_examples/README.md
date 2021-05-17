@@ -11,6 +11,10 @@ to:
 ![image](https://user-images.githubusercontent.com/6240170/118540459-9adcde00-b71e-11eb-814c-b9063eab1957.png)
 
 
+The form can be fully customized. For example, [generic.json](https://github.com/broadinstitute/reviewer2/blob/main/form_schema_examples/generic.json)
+changes the form to:
+
+![image](https://user-images.githubusercontent.com/6240170/118543032-c3b2a280-b721-11eb-8651-258a378e7bbc.png)
 
 For a list of supported icons (beyond thumbs up, thumbs down), see
 https://semantic-ui.com/elements/icon.html
