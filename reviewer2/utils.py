@@ -2,7 +2,6 @@ import collections
 from jinja2 import Template
 import json
 import os
-import pandas as pd
 import pkg_resources
 from wcmatch import glob
 
@@ -132,30 +131,6 @@ def get_relative_directory_to_metadata(top_level_dir, relative_directory_to_data
 
 def is_excel_table(path):
     return any(path.endswith(suffix) for suffix in ("xls", "xlsx"))
-
-
-def parse_table(path):
-    if not os.path.isfile(path):
-        raise ValueError(f"{path} not found")
-
-    try:
-        if is_excel_table(path):
-            df = pd.read_excel(path)
-        else:
-            df = pd.read_table(path)
-    except Exception as e:
-        raise ValueError(f"Unable to parse {path}: {e}")
-
-        # validate table contents
-    if 'Path' not in df.columns:
-        raise ValueError(f"{path} must have a column named 'Path'")
-
-    df.set_index('Path', inplace=True, drop=False)
-
-    df = df.fillna('')
-    print(f"Parsed {len(df)} rows from {path}")
-
-    return df
 
 
 def get_data_page_url(page_number, last):

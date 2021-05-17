@@ -2,7 +2,7 @@ import json
 from flask import request, Response
 import pandas as pd
 
-from reviewer2 import args, FORM_SCHEMA, FORM_RESPONSES, FORM_SCHEMA_COLUMNS
+from reviewer2 import args, FORM_SCHEMA, FORM_RESPONSES, FORM_SCHEMA_COLUMNS, PATH_COLUMN
 
 
 def error_response(message, status=400):
@@ -19,7 +19,7 @@ def save_form_handler():
         return error_response("'relative_directory' not provided")
 
     # transfer values to FORM_RESPONSES
-    for form_schema_row in [{'name': 'relative_directory', 'columnName': 'Path'}] + FORM_SCHEMA:
+    for form_schema_row in [{'name': 'relative_directory', 'columnName': PATH_COLUMN}] + FORM_SCHEMA:
         value = params.get(form_schema_row['name'])
         if value is None:
             continue
@@ -35,7 +35,7 @@ def save_form_handler():
     # write FORM_RESPONSES to file
     # NOTE: This is not thread-safe and assumes a single-threaded server. For multi-threaded
     # or multi-process servers like gunicorn, this will need to be replaced with a sqlite or redis backend.
-    df = pd.DataFrame(FORM_RESPONSES.values(), columns=['Path'] + FORM_SCHEMA_COLUMNS).fillna('')
+    df = pd.DataFrame(FORM_RESPONSES.values(), columns=[PATH_COLUMN] + FORM_SCHEMA_COLUMNS).fillna('')
     if args.form_responses_table_is_excel:
         df.to_excel(args.form_responses_table)
     else:

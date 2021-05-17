@@ -4,8 +4,10 @@ import json
 import os
 import pandas as pd
 import re
-from reviewer2.utils import get_relative_directory_to_data_files_list, get_relative_directory_to_metadata, parse_table, \
-    is_excel_table
+from reviewer2.utils import get_relative_directory_to_data_files_list, get_relative_directory_to_metadata, is_excel_table
+
+
+PATH_COLUMN = 'Path'
 
 p = configargparse.ArgumentParser(
     formatter_class=configargparse.DefaultsFormatter,
@@ -51,6 +53,31 @@ if not os.path.isdir(args.directory):
 
 args.directory = os.path.realpath(args.directory)
 
+
+def parse_table(path):
+    if not os.path.isfile(path):
+        raise ValueError(f"{path} not found")
+
+    try:
+        if is_excel_table(path):
+            df = pd.read_excel(path)
+        else:
+            df = pd.read_table(path)
+    except Exception as e:
+        raise ValueError(f"Unable to parse {path}: {e}")
+
+        # validate table contents
+    if PATH_COLUMN not in df.columns:
+        raise ValueError(f"{path} must have a column named '{PATH_COLUMN}'")
+
+    df.set_index(PATH_COLUMN, inplace=True, drop=False)
+
+    df = df.fillna('')
+    print(f"Parsed {len(df)} rows from {path}")
+
+    return df
+
+
 # search directory for images and data files
 RELATIVE_DIRECTORY_TO_DATA_FILES_LIST = get_relative_directory_to_data_files_list(
     args.directory,
@@ -78,7 +105,7 @@ if args.metadata_table and os.path.isfile(args.metadata_table):
         p.error(str(e))
 
     for relative_directory, row in df.iterrows():
-        metadata_dict = {k: v for k, v in row.to_dict().items() if k != 'Path'}
+        metadata_dict = {k: v for k, v in row.to_dict().items() if k != PATH_COLUMN}
         if relative_directory not in RELATIVE_DIRECTORY_TO_METADATA:
             RELATIVE_DIRECTORY_TO_METADATA[relative_directory] = {}
             if args.verbose:
@@ -91,16 +118,6 @@ if args.metadata_table and os.path.isfile(args.metadata_table):
         for key in metadata_dict:
             if key not in METADATA_COLUMNS:
                 METADATA_COLUMNS.append(key)
-
-if METADATA_COLUMNS and args.sort_by:
-    invalid_values = ", ".join([f"'{s}'" for s in args.sort_by if s not in METADATA_COLUMNS])
-    if invalid_values:
-        p.error(f"{invalid_values} column(s) not found in metadata. --sort-by value should be one of: " +
-                ", ".join(METADATA_COLUMNS))
-
-    print(f"Sorting pages by {', '.join(args.sort_by)}")
-    get_sort_key = lambda i: tuple([str(RELATIVE_DIRECTORY_TO_METADATA.get(i[0], {}).get(s)) for s in args.sort_by])
-    RELATIVE_DIRECTORY_TO_DATA_FILES_LIST = sorted(RELATIVE_DIRECTORY_TO_DATA_FILES_LIST, key=get_sort_key)
 
 # define input form fields to show on each data page
 FORM_SCHEMA = [
@@ -136,7 +153,6 @@ if args.form_schema_json and os.path.isfile(args.form_schema_json):
             FORM_SCHEMA = json.load(f)
     except Exception as e:
         p.error(f"Couldn't parse {args.form_schema_json}: {e}")
-
 
 FORM_SCHEMA_COLUMNS = [r['columnName'] for r in FORM_SCHEMA]
 
@@ -189,8 +205,8 @@ if FORM_SCHEMA:
             p.error(f"Unable to create {args.form_responses_table}")
 
         # create empty table in memory
-        df = pd.DataFrame(columns=['Path'] + FORM_SCHEMA_COLUMNS)
-        df.set_index('Path', inplace=True, drop=False)
+        df = pd.DataFrame(columns=[PATH_COLUMN] + FORM_SCHEMA_COLUMNS)
+        df.set_index(PATH_COLUMN, inplace=True, drop=False)
 
     # store form responses in memory.
     # NOTE: This is not thread-safe and assumes a single-threaded server. For multi-threaded
@@ -200,3 +216,35 @@ if FORM_SCHEMA:
         FORM_RESPONSES[relative_directory] = row.to_dict()
 
     print(f"Will save form responses to {args.form_responses_table}  (columns: {', '.join(FORM_SCHEMA_COLUMNS)})")
+
+
+if args.sort_by:
+    valid_columns = set([PATH_COLUMN])
+    valid_columns.update(FORM_SCHEMA_COLUMNS)
+    if METADATA_COLUMNS:
+        valid_columns.update(METADATA_COLUMNS)
+
+    invalid_values = ", ".join([f"'{s}'" for s in args.sort_by if s not in valid_columns])
+    if invalid_values:
+        p.error(f"{invalid_values} column(s) not found in metadata. --sort-by value should be one of: " +
+                ", ".join(valid_columns))
+
+    print(f"Sorting {len(RELATIVE_DIRECTORY_TO_DATA_FILES_LIST)} pages by {', '.join(args.sort_by)}")
+    def get_sort_key(i):
+        relative_dir = i[0]
+        sort_key = []
+        for s in args.sort_by:
+            if s == PATH_COLUMN:
+                sort_key.append(relative_dir)
+                continue
+            form_value = FORM_RESPONSES.get(relative_dir, {}).get(s)
+            if form_value is not None:
+                sort_key.append(str(form_value))
+                continue
+            metadata_value = RELATIVE_DIRECTORY_TO_METADATA.get(relative_dir, {}).get(s)
+            if metadata_value is not None:
+                sort_key.append(str(metadata_value))
+                continue
+        return tuple(sort_key)
+
+    RELATIVE_DIRECTORY_TO_DATA_FILES_LIST = sorted(RELATIVE_DIRECTORY_TO_DATA_FILES_LIST, key=get_sort_key)
