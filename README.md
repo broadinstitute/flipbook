@@ -67,7 +67,7 @@ After the server is running, open your web browser to [http://localhost:8080](ht
 
 - custom form schema (`--form-schema-json`):  
    
-  Path of .json file containing a custom form schema. For the expected format see [main/form_schema_examples](https://github.com/broadinstitute/reviewer2/tree/main/form_schema_examples)
+  Path or url of .json file containing a custom form schema. For the expected format see [main/form_schema_examples](https://github.com/broadinstitute/reviewer2/tree/main/form_schema_examples)
   
 - `~/.reviewer2_config`  
 
