@@ -4,6 +4,7 @@ import json
 import os
 import pandas as pd
 import re
+import requests
 from reviewer2.utils import get_relative_directory_to_data_files_list, get_relative_directory_to_metadata, is_excel_table
 
 
@@ -34,7 +35,7 @@ p.add_argument("-m", "--metadata-table", default="reviewer2_metadata.tsv",
                     "and 'reviewer2_metadata.json' files are found, the values from this table will override values in "
                     "the 'reviewer2_metadata.json' files.")
 p.add_argument("--form-schema-json", help="Path of .json file containing a custom form schema. For the expected format "
-                    "see the FORM_SCHEMA value in https://github.com/broadinstitute/reviewer2/blob/main/reviewer2/__init__a.py")
+                    "see the FORM_SCHEMA value in https://github.com/broadinstitute/reviewer2/blob/main/reviewer2/__init__.py")
 p.add_argument("-s", "--sort-by", action="append", help="Order pages by metadata column(s)")
 p.add_argument("--hide-metadata-on-home-page", action="store_true", help="Don't show metadata columns in the "
                "home page table")
@@ -122,37 +123,52 @@ if args.metadata_table and os.path.isfile(args.metadata_table):
 # define input form fields to show on each data page
 FORM_SCHEMA = [
     {
-        'type': 'radio',
-        'columnName': 'Verdict',
-        'choices': [
-            {'value': 'good', 'label': '<i class="thumbs up outline icon"></i> Good'},
-            {'value': 'bad', 'label': '<i class="thumbs down outline icon"></i> Bad'},
-        ],
+        "type": "radio",
+        "columnName": "Verdict",
+        "choices": [
+            {"value": "normal", "label": "<i class='thumbs up outline icon'></i> Normal"},
+            {"value": "premutation", "label": "<i class='thumbs down outline icon'></i> Premutation"},
+            {"value": "pathogenic", "label": "<i class='thumbs down outline icon'></i> Pathogenic"}
+        ]
     },
     {
-        'type': 'radio',
-        'columnName': 'Confidence',
-        'inputLabel': 'Confidence',
-        'choices': [
-            {'value': 'high', 'label': 'High'},
-            {'value': 'low', 'label': 'Low'},
-        ],
+        "type": "radio",
+        "columnName": "Confidence",
+        "inputLabel": "Confidence",
+        "choices": [
+            {"value": "high", "label": "High"},
+            {"value": "low", "label": "Low"}
+        ]
     },
     {
-        'type': 'text',
-        'columnName': 'Notes',
-        'size': 100,
-    },
+        "type": "text",
+        "columnName": "Notes",
+        "size": 100
+    }
 ]
 
-if args.form_schema_json and os.path.isfile(args.form_schema_json):
-    #args.form_schema_json = os.path.join(args.directory, args.form_schema_json)
+if args.form_schema_json:
     print(f"Loading form schema from {args.form_schema_json}")
     try:
-        with open(args.form_schema_json, "rt") as f:
-            FORM_SCHEMA = json.load(f)
+        if os.path.isfile(args.form_schema_json):
+            with open(args.form_schema_json, "rt") as f:
+                FORM_SCHEMA = json.load(f)
+        elif args.form_schema_json.startswith("http"):
+            # Convert https://github.com/broadinstitute/reviewer2/blob/main/reviewer2/__init__.py to the raw url:
+            # https://raw.githubusercontent.com/broadinstitute/reviewer2/main/reviewer2/__init__.py
+            github_match = re.search("http://github.com/(.*)/blob/(.*)", args.form_schema_json)
+            if github_match:
+                part1 = github_match.group(1)
+                part2 = github_match.group(2)
+                github_raw_file_url = f"https://raw.githubusercontent.com/{part1}/{part2}"
+                if args.verbose:
+                    print(f"Converting form schema url {args.form_schema_json} to {github_raw_file_url}")
+                args.form_schema_json = github_raw_file_url
+            r = requests.get(url=args.form_schema_json)
+            FORM_SCHEMA = r.json()
     except Exception as e:
         p.error(f"Couldn't parse {args.form_schema_json}: {e}")
+
 
 FORM_SCHEMA_COLUMNS = [r['columnName'] for r in FORM_SCHEMA]
 

@@ -1,0 +1,25 @@
+[
+    {
+        "type": "radio",
+        "columnName": "Verdict",
+        "choices": [
+            {"value": "normal", "label": "Normal"},
+            {"value": "premutation", "label": "Premutation"},
+            {"value": "pathogenic", "label": "Pathogenic"}
+        ]
+    },
+    {
+        "type": "radio",
+        "columnName": "Confidence",
+        "inputLabel": "Confidence",
+        "choices": [
+            {"value": "high", "label": "High"},
+            {"value": "low", "label": "Low"}
+        ]
+    },
+    {
+        "type": "text",
+        "columnName": "Notes",
+        "size": 100
+    }
+]

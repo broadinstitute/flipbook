@@ -1,0 +1,24 @@
+[
+  {
+    "type": "radio",
+    "columnName": "Verdict",
+    "choices": [
+      {"value": "right", "label": "<i class='thumbs up outline icon'></i> Right"},
+      {"value": "wrong", "label": "<i class='thumbs down outline icon'></i> Wrong"}
+    ]
+  },
+  {
+    "type": "radio",
+    "columnName": "Confidence",
+    "inputLabel": "Confidence",
+    "choices": [
+      {"value": "high", "label": "High"},
+      {"value": "low", "label": "Low"}
+    ]
+  },
+  {
+    "type": "text",
+    "columnName": "Notes",
+    "size": 100
+  }
+]

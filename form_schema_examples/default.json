@@ -1,0 +1,25 @@
+[
+  {
+    "type": "radio",
+    "columnName": "Verdict",
+    "choices": [
+      {"value": "normal", "label": "<i class='thumbs up outline icon'></i> Normal"},
+      {"value": "premutation", "label": "<i class='thumbs down outline icon'></i> Premutation"},
+      {"value": "pathogenic", "label": "<i class='thumbs down outline icon'></i> Pathogenic"}
+    ]
+  },
+  {
+    "type": "radio",
+    "columnName": "Confidence",
+    "inputLabel": "Confidence",
+    "choices": [
+      {"value": "high", "label": "High"},
+      {"value": "low", "label": "Low"}
+    ]
+  },
+  {
+    "type": "text",
+    "columnName": "Notes",
+    "size": 100
+  }
+]
