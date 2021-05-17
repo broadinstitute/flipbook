@@ -36,14 +36,20 @@ def data_page_handler():
 
     i = params.get("i")
     try:
-        i = int(i)
+        if isinstance(i, list):
+            i = int(i[0])
+        else:
+            i = int(i)
     except (ValueError, TypeError) as e:
         print(f"ERROR: unable to parse parameter i: '{i}': {type(e).__name__} {e}. Setting i = 1.")
         i = 1
 
     last = params.get("last", i)
     try:
-        last = int(last)
+        if isinstance(i, list):
+            last = int(last[0])
+        else:
+            last = int(last)
     except (ValueError, TypeError) as e:
         print(f"ERROR: unable to parse parameter 'last': '{last}': {type(e).__name__} {e}. Setting last = {i}.")
         last = i
