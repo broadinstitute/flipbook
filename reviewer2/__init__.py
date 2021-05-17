@@ -35,7 +35,7 @@ p.add_argument("-m", "--metadata-table", default="reviewer2_metadata.tsv",
                     "and 'reviewer2_metadata.json' files are found, the values from this table will override values in "
                     "the 'reviewer2_metadata.json' files.")
 p.add_argument("--form-schema-json", help="Path of .json file containing a custom form schema. For the expected format "
-                    "see the FORM_SCHEMA value in https://github.com/broadinstitute/reviewer2/blob/main/reviewer2/__init__.py")
+                    "see https://github.com/broadinstitute/reviewer2/tree/main/form_schema_examples")
 p.add_argument("-s", "--sort-by", action="append", help="Order pages by metadata column(s)")
 p.add_argument("--hide-metadata-on-home-page", action="store_true", help="Don't show metadata columns in the "
                "home page table")
@@ -156,7 +156,7 @@ if args.form_schema_json:
         elif args.form_schema_json.startswith("http"):
             # Convert https://github.com/broadinstitute/reviewer2/blob/main/reviewer2/__init__.py to the raw url:
             # https://raw.githubusercontent.com/broadinstitute/reviewer2/main/reviewer2/__init__.py
-            github_match = re.search("http://github.com/(.*)/blob/(.*)", args.form_schema_json)
+            github_match = re.search("//github.com/(.*)/blob/(.*)", args.form_schema_json)
             if github_match:
                 part1 = github_match.group(1)
                 part2 = github_match.group(2)
