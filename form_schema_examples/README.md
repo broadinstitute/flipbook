@@ -10,6 +10,11 @@ to:
 
 ![image](https://user-images.githubusercontent.com/6240170/118540459-9adcde00-b71e-11eb-814c-b9063eab1957.png)
 
+
+
+For a list of supported icons (beyond thumbs up, thumbs down), see
+https://semantic-ui.com/elements/icon.html
+
 ---
 To use one of these schemas, you can either download the raw json file and pass its local file path via 
 ```
