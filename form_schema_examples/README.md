@@ -20,11 +20,11 @@ For a list of supported icons (beyond thumbs up, thumbs down), see
 https://semantic-ui.com/elements/icon.html
 
 ---
-To use one of these schemas, you can either download the raw json file and pass its local file path via 
+To use one of these schemas, you can download the raw json file, edit it if necessary, and pass it to reviewer2 with 
 ```
 python3 -m reviewer2 --form-schema-json path/my_schema.json
 ```
-or just pass the url directly via 
+or if one of the examples is what you want, then you can just pass in the url with 
 ```
 python3 -m reviewer2 --form-schema-json https://github.com/broadinstitute/reviewer2/blob/main/form_schema_examples/str_genotypes.json
 ```
