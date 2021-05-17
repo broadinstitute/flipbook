@@ -9,3 +9,13 @@ changes the form from the default:
 to:
 
 ![image](https://user-images.githubusercontent.com/6240170/118540459-9adcde00-b71e-11eb-814c-b9063eab1957.png)
+
+---
+To use one of these schemas, you can either download the raw json file and pass its local file path via 
+```
+python3 -m reviewer2 --form-schema-json path/my_schema.json
+```
+or just pass the url directly via 
+```
+python3 -m reviewer2 --form-schema-json https://github.com/broadinstitute/reviewer2/blob/main/form_schema_examples/str_genotypes.json
+```
