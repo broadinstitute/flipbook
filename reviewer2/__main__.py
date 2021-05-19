@@ -31,6 +31,6 @@ os.environ["WERKZEUG_RUN_MAIN"] = "true"
 
 app.run(
     debug=args.dev_mode,
-    host=os.environ.get('HOST', '127.0.0.1'),
-    port=int(os.environ.get('PORT', 8080)))
+    host=os.environ.get('HOST', args.host),
+    port=int(os.environ.get('PORT', args.port)))
 

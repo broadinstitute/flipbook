@@ -43,7 +43,7 @@ p.add_argument("--hide-metadata-on-home-page", action="store_true", help="Don't 
 #p.add_argument("-c", "--config-file", help="Path of yaml config file", env_var="REVIEWER2_CONFIG_FILE")
 p.add_argument("-v", "--verbose", action='count', default=0, help="Print more info")
 p.add_argument("--host", default="127.0.0.1", env_var="HOST", help="Listen for connections on this hostname or IP")
-p.add_argument("--port", default="8080", env_var="PORT", help="Listen for connections on this port")
+p.add_argument("--port", default="8080", env_var="PORT", type=int, help="Listen for connections on this port")
 p.add_argument("--dev-mode", action="store_true", env_var="DEV", help="Run server in developer mode so it reloads "
                "html templates and source code if they're changed")
 p.add_argument("directory", default=".", nargs="?", help="Top-level directory to search for images and data files")
