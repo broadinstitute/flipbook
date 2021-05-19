@@ -29,8 +29,13 @@ app.add_url_rule('/<path:path>', view_func=send_file, methods=['GET'])
 
 os.environ["WERKZEUG_RUN_MAIN"] = "true"
 
+host = os.environ.get('HOST', args.host)
+port = int(os.environ.get('PORT', args.port))
+if args.verbose:
+    print(f"Connecting to {host}:{port}")
+
 app.run(
     debug=args.dev_mode,
-    host=os.environ.get('HOST', args.host),
-    port=int(os.environ.get('PORT', args.port)))
+    host=host,
+    port=port)
 

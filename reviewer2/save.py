@@ -2,7 +2,8 @@ import json
 from flask import request, Response
 import pandas as pd
 
-from reviewer2 import args, FORM_SCHEMA, FORM_RESPONSES, FORM_SCHEMA_COLUMNS, PATH_COLUMN
+from reviewer2 import args, FORM_SCHEMA, FORM_RESPONSES, FORM_SCHEMA_COLUMNS, PATH_COLUMN, \
+    METADATA_COLUMNS, RELATIVE_DIRECTORY_TO_METADATA
 
 
 def error_response(message, status=400):
@@ -32,10 +33,27 @@ def save_form_handler():
         if args.verbose:
             print(f"Setting {params['relative_directory']} {form_schema_row['columnName']} = {value}")
 
-    # write FORM_RESPONSES to file
+    # transfer metadata values to FORM_RESPONSES
+    output_table_rows = []
+    output_table_columns = [PATH_COLUMN] + FORM_SCHEMA_COLUMNS
+    if args.add_metadata_to_form_responses_table:
+        output_table_columns += METADATA_COLUMNS
+        for relative_dir in FORM_RESPONSES:  # set(RELATIVE_DIRECTORY_TO_METADATA.keys()) |
+            output_dict = {
+                PATH_COLUMN: relative_dir,
+            }
+            output_dict.update(RELATIVE_DIRECTORY_TO_METADATA.get(relative_dir, {}))
+            output_dict.update(FORM_RESPONSES.get(relative_dir, {}))
+            output_table_rows.append(output_dict)
+        output_table_columns = []
+
+    else:
+        output_table_rows = FORM_RESPONSES.values()
+
+    # write table to file
     # NOTE: This is not thread-safe and assumes a single-threaded server. For multi-threaded
     # or multi-process servers like gunicorn, this will need to be replaced with a sqlite or redis backend.
-    df = pd.DataFrame(FORM_RESPONSES.values(), columns=[PATH_COLUMN] + FORM_SCHEMA_COLUMNS).fillna('')
+    df = pd.DataFrame(output_table_rows, columns=output_table_columns).fillna('')
     if args.form_responses_table_is_excel:
         df.to_excel(args.form_responses_table)
     else:

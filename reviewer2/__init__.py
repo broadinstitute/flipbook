@@ -39,6 +39,8 @@ p.add_argument("--form-schema-json", help="Path of .json file containing a custo
 p.add_argument("-s", "--sort-by", action="append", help="Order pages by metadata column(s)")
 p.add_argument("--hide-metadata-on-home-page", action="store_true", help="Don't show metadata columns in the "
                "home page table")
+p.add_argument("--add-metadata-to-form-responses-table", action="store_true", help="Also write metadata columns to the "
+                "form responses table when saving users' form responses")
 
 #p.add_argument("-c", "--config-file", help="Path of yaml config file", env_var="REVIEWER2_CONFIG_FILE")
 p.add_argument("-v", "--verbose", action='count', default=0, help="Print more info")
