@@ -38,7 +38,7 @@ setup(
     py_modules=["compare_form_response_tables"],
     include_package_data=True,
     package_data={'': ['*/*.png', '*/*.html']},
-    python_requires=">=3.6",
+    python_requires=">=3.7",
     license="MIT",
     keywords='curation, NGS, sequencing, STRs, REviewer, read visualization, machine learning',
     url='https://github.com/broadinstitute/reviewer2',
