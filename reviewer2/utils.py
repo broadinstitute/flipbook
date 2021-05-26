@@ -22,7 +22,7 @@ def get_relative_directory_to_data_files_list(
     data_file_paths = []
 
     print(f"Looking for " + ", ".join(suffixes[:-1]) + f", and {suffixes[-1]} files in {top_level_dir}")
-    glob_string = "|".join([f"{top_level_dir}/**/*{suffix}" for suffix in suffixes])
+    glob_string = "|".join([f"{top_level_dir}/**/*{suffix}" for suffix in suffixes]).replace("\\", "/")
     matching_paths = glob.glob(glob_string, flags=glob.GLOBSTAR|glob.SPLIT)
     data_file_paths += matching_paths
 
