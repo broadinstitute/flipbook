@@ -22,7 +22,7 @@ def get_relative_directory_to_data_files_list(
     data_file_paths = []
 
     print(f"Looking for " + ", ".join(suffixes[:-1]) + f", and {suffixes[-1]} files in {top_level_dir}")
-    glob_string = "|".join([os.path.join(top_level_dir, f"**/*{suffix}") for suffix in suffixes])
+    glob_string = "|".join([f"{top_level_dir}/**/*{suffix}" for suffix in suffixes])
     matching_paths = glob.glob(glob_string, flags=glob.GLOBSTAR|glob.SPLIT)
     data_file_paths += matching_paths
 
@@ -78,9 +78,9 @@ def get_relative_directory_to_data_files_list(
     data_file_counter_string = ", ".join([
         ("" if i < len(data_file_counter_by_suffix) - 1 or len(data_file_counter_by_suffix) < 2 else "and ") +
         f"{counter} {suffix} file" +
-        ("s" if counter > 1 else "")
+        ("s" if counter != 1 else "")
         for i, (suffix, counter) in enumerate(data_file_counter_by_suffix.items())
-    ])
+    ]) if data_file_counter_by_suffix else "0 matching files"
     print(f"Found {data_file_counter_string}" + (
         f" in {len(subdirectories_list)} subdirectories" if len(subdirectories_list) > 1 else ""
     ))
