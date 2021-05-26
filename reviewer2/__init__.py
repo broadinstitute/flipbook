@@ -51,6 +51,9 @@ p.add_argument("--dev-mode", action="store_true", env_var="DEV", help="Run serve
 p.add_argument("directory", default=".", nargs="?", help="Top-level directory to search for images and data files")
 args = p.parse_args()
 
+if args.verbose > 1:
+    p.print_values()
+
 if not os.path.isdir(args.directory):
     p.error(f"{args.directory} directory not found")
 
