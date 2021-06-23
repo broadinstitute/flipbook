@@ -157,7 +157,7 @@
                         {% endif %}
                     </div>
 
-                    <img class="img-default-view" src="/{{ image_file_path }}" tabindex="{{ tabindex.value }}"/>
+                    <img class="img-default-view" src="/{{ image_file_path }}?cache={{ image_file_path | ctime}}" tabindex="{{ tabindex.value }}"/>
                     {% set tabindex.value = tabindex.value + 1 %}
                     {% set section_counter.value = section_counter.value + 1 %}
                 {% endfor %}
