@@ -1,7 +1,7 @@
 from flask import request, Response
 from pprint import pprint, pformat
 from reviewer2 import args, RELATIVE_DIRECTORY_TO_DATA_FILES_LIST, FORM_SCHEMA, FORM_RESPONSES, \
-    RELATIVE_DIRECTORY_TO_METADATA, FORM_RADIO_BUTTON_KEYBOARD_SHORTCUTS
+    RELATIVE_DIRECTORY_TO_METADATA, FORM_RADIO_BUTTON_KEYBOARD_SHORTCUTS, EXTRA_DATA_IN_FORM_RESPONSES_TABLE
 from reviewer2.utils import load_jinja_template, get_data_page_url, CONTENT_HTML_FILE_TYPE, IMAGE_FILE_TYPE
 
 DATA_PAGE_TEMPLATE = None
@@ -76,6 +76,7 @@ def data_page_handler():
             image_file_paths.append(data_file_path)
 
     metadata_json_dict = RELATIVE_DIRECTORY_TO_METADATA.get(relative_dir, {})
+    metadata_json_dict.update(EXTRA_DATA_IN_FORM_RESPONSES_TABLE.get(relative_dir, {}))
 
     content_html_strings = []
     for data_file_type, data_file_path in data_file_types_and_paths:

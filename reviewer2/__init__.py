@@ -176,7 +176,7 @@ if args.form_schema_json:
 
 FORM_SCHEMA_COLUMNS = [r['columnName'] for r in FORM_SCHEMA]
 
-# validate FORM_SCHEMA and determine keyboad shortcuts
+# validate FORM_SCHEMA and determine keyboard shortcuts
 FORM_RADIO_BUTTON_KEYBOARD_SHORTCUTS = {}
 for i, form_schema_row in enumerate(FORM_SCHEMA):
     if not isinstance(form_schema_row, dict):
@@ -189,6 +189,7 @@ for i, form_schema_row in enumerate(FORM_SCHEMA):
         raise ValueError(f"FORM_SCHEMA row {i} has unexpected 'type' value: {form_schema_row['type']}")
     if 'name' not in form_schema_row:
         form_schema_row['name'] = form_schema_row['columnName'].lower()
+    form_schema_row['name'] = re.sub("[^a-zA-Z0-9_]", "_", form_schema_row['name'])
     if 'inputLabel' not in form_schema_row:
         form_schema_row['inputLabel'] = form_schema_row['columnName']
 
@@ -210,6 +211,11 @@ for i, form_schema_row in enumerate(FORM_SCHEMA):
 # parse or create FORM_RESPONSES dict for storing user responses
 FORM_RESPONSES = {}
 
+# if a form_responses_table is provided with additional columns which are not in the current FORM_SCHEMA (eg. if the
+# form schema changes, save this info here so it's not lost when the table is updated after new form responses.
+EXTRA_COLUMNS_IN_FORM_RESPONSES_TABLE = []
+EXTRA_DATA_IN_FORM_RESPONSES_TABLE = {}
+
 if FORM_SCHEMA:
     args.form_responses_table = os.path.join(args.directory, args.form_responses_table)
     args.form_responses_table_is_excel = is_excel_table(args.form_responses_table)
@@ -219,6 +225,8 @@ if FORM_SCHEMA:
             df = parse_table(args.form_responses_table)
         except ValueError as e:
             p.error(str(e))
+
+        EXTRA_COLUMNS_IN_FORM_RESPONSES_TABLE = [c for c in df.columns if c not in FORM_SCHEMA_COLUMNS and c != PATH_COLUMN]
     else:
         # make sure the table can be written out later
         if not os.access(os.path.dirname(args.form_responses_table), os.W_OK):
@@ -233,9 +241,11 @@ if FORM_SCHEMA:
     # or multi-process servers like gunicorn, this will need to be replaced with a sqlite or redis backend.
     FORM_RESPONSES = collections.OrderedDict()
     for relative_directory, row in df.iterrows():
-        FORM_RESPONSES[relative_directory] = row.to_dict()
+        row_as_dict = row.to_dict()
+        FORM_RESPONSES[relative_directory] = {k: v for k, v in row_as_dict.items() if k in FORM_SCHEMA_COLUMNS}
+        EXTRA_DATA_IN_FORM_RESPONSES_TABLE[relative_directory] = {k: v for k, v in row_as_dict.items() if k not in FORM_SCHEMA_COLUMNS and k != PATH_COLUMN}
 
-    print(f"Will save form responses to {args.form_responses_table}  (columns: {', '.join(FORM_SCHEMA_COLUMNS)})")
+    print(f"Will save form responses to {args.form_responses_table}  (columns: {', '.join(FORM_SCHEMA_COLUMNS + EXTRA_COLUMNS_IN_FORM_RESPONSES_TABLE)})")
 
 
 if args.sort_by:

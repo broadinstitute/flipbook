@@ -198,6 +198,10 @@
         serializeForm: true,
         throttleFirstRequest: false,
         throttle: 300,
+        beforeSend: function(settings) {
+          console.log('Saving', settings.data)
+          return settings
+        },
         onRequest: function(request) {
           $('#save-status i').attr('class', 'spinner loading icon')
           $('#save-status i').attr('style', 'color:#666666')
