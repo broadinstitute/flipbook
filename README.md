@@ -45,13 +45,7 @@ python3 -m reviewer2 -m /path/metadata.tsv          #  provide a metadata table
 
 After the server is running, open your web browser to [http://localhost:8080](http://localhost:8080) to start reviewing images.
 
-### Optional:
-
-- responses table (`-t`)
-
-  As you fill in the forms at the top of the image pages, the responses are written to this table. 
-  
-  *Default*: `reviewer2_form_responses.tsv`
+### Options:
 
 - metadata table (`-m`) :
   
@@ -65,14 +59,28 @@ After the server is running, open your web browser to [http://localhost:8080](ht
   Since the keys and values are treated as html, they can be used to add more complex info - such as
   colors, text formatting, <img ..> tags with images from other web pages, iframes containing entire sections of external pages, etc. 
 
+- responses table (`-t`)
+
+  As you fill in the forms at the top of the image pages, the responses are written to this table. If you later restart reviewer2 with the same `-t`, it will reload previous responses. You can also optionally use this table to provide additional columns to display - sometimes this can be more convenient than using `-m`. 
+  
+  *Default*: `reviewer2_form_responses.tsv`
+
 - custom form schema (`--form-schema-json`):  
    
   Path or url of .json file containing a custom form schema. For the expected format see [main/form_schema_examples](https://github.com/broadinstitute/reviewer2/tree/main/form_schema_examples)
   
-- `~/.reviewer2_config`  
+- config file (`~/.reviewer2_config`)
 
-  Most settings that can be provided on the command line can also be set via this YAML config file instead.
-  
+  Most settings that can be provided on the command line can also be set via this YAML config file instead. For example:
+
+  *~/.reviewer2_config*
+  ```
+  form-schema-json: /path/to/my-schema.json
+  hide-metadata-on-home-page: 'true'
+  host: 127.0.0.1
+  port: '8080'
+  ```
+
   
 For more details, run:   
 ```
