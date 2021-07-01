@@ -47,7 +47,7 @@ After the server is running, open your web browser to [http://localhost:8080](ht
 
 ### Options:
 
-- metadata table (`-m`) :
+- metadata table (`-m`)
   
   It's often useful to add extra info to the image pages to help with review - such as image descriptions, quality scores, etc.
   To enable this, there are several ways to specify arbitrary key-value pairs to add to specific image pages.
@@ -65,9 +65,9 @@ After the server is running, open your web browser to [http://localhost:8080](ht
   
   *Default*: `reviewer2_form_responses.tsv`
 
-- custom form schema (`--form-schema-json`):  
+- custom form schema (`--form-schema-json`)  
    
-  Path or url of .json file containing a custom form schema. For the expected format see [main/form_schema_examples](https://github.com/broadinstitute/reviewer2/tree/main/form_schema_examples)
+  If you'd like to use non-default questions in the image page forms, you can specify the path or url of a .json file containing a custom form schema. For examples of the expected format see [main/form_schema_examples](https://github.com/broadinstitute/reviewer2/tree/main/form_schema_examples)
   
 - config file (`~/.reviewer2_config`)
 
