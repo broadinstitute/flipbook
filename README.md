@@ -76,9 +76,9 @@ After the server is running, open your web browser to [http://localhost:8080](ht
   *~/.reviewer2_config*
   ```
   form-schema-json: /path/to/my-schema.json
-  hide-metadata-on-home-page: 'true'
+  hide-metadata-on-home-page: true
   host: 127.0.0.1
-  port: '8080'
+  port: 8080
   ```
 
   
