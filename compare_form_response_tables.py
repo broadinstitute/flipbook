@@ -21,12 +21,18 @@ def parse_args():
     args = p.parse_args()
 
     try:
-        df1 = pd.read_table(args.table1)
+        if args.table1.endswith(".xls") or args.table1.endswith(".xlsx"):
+            df1 = pd.read_excel(args.table1)
+        else:
+            df1 = pd.read_table(args.table1)
     except Exception as e:
         p.error(f"Error parsing {args.table1}: {e}")
 
     try:
-        df2 = pd.read_table(args.table2)
+        if args.table2.endswith(".xls") or args.table2.endswith(".xlsx"):
+            df2 = pd.read_excel(args.table2)
+        else:
+            df2 = pd.read_table(args.table2)
     except Exception as e:
         p.error(f"Error parsing {args.table2}: {e}")
 
