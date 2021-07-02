@@ -16,6 +16,7 @@ p = configargparse.ArgumentParser(
     add_env_var_help=True,
     config_file_parser_class=configargparse.YAMLConfigFileParser,
     default_config_files=["~/.reviewer2_config"],
+    args_for_writing_out_config_file=["--save-current-options-to-config-file"],
 )
 p.add_argument("-i", "--include", action="append", help="Only include files whose path contains this keyword")
 p.add_argument("-x", "--exclude", action="append", help="Skip files whose path contains this keyword. If both "
