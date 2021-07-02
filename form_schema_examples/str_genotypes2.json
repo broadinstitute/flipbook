@@ -4,7 +4,7 @@
         "columnName": "Verdict",
         "choices": [
             {"value": "normal", "label": "Normal"},
-            {"value": "borderline-normal", "label": "Borderline-Premutation"},
+            {"value": "borderline-premutation", "label": "Borderline-Premutation"},
             {"value": "premutation", "label": "Premutation"},
             {"value": "borderline-pathogenic", "label": "Borderline-Pathogenic"},
             {"value": "pathogenic", "label": "Pathogenic"}
