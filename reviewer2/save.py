@@ -54,6 +54,7 @@ def save_form_handler():
     # NOTE: This is not thread-safe and assumes a single-threaded server. For multi-threaded
     # or multi-process servers like gunicorn, this will need to be replaced with a sqlite or redis backend.
     df = pd.DataFrame(output_table_rows, columns=output_table_columns).fillna('')
+    print(f"Saving {len(df)} rows to {args.form_responses_table}")
     if args.form_responses_table_is_excel:
         df.to_excel(args.form_responses_table)
     else:

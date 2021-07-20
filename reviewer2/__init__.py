@@ -67,7 +67,7 @@ def parse_table(path):
 
     try:
         if is_excel_table(path):
-            df = pd.read_excel(path)
+            df = pd.read_excel(path, engine="openpyxl")
         else:
             df = pd.read_table(path)
     except Exception as e:
@@ -132,8 +132,10 @@ FORM_SCHEMA = [
         "type": "radio",
         "columnName": "Verdict",
         "choices": [
-            {"value": "good", "label": "<i class='thumbs up outline icon'></i> Good"},
-            {"value": "bad", "label": "<i class='thumbs down outline icon'></i> Bad"},
+            {"value": "normal", "label": "Normal"},
+            {"value": "intermediate", "label": "Intermediate"},
+            {"value": "full-expansion", "label": "Full Expansion"},
+            {"value": "double-expansion", "label": "Double Expansion"},
         ]
     },
     {
@@ -141,14 +143,14 @@ FORM_SCHEMA = [
         "columnName": "Confidence",
         "inputLabel": "Confidence",
         "choices": [
-            {"value": "high", "label": "High"},
-            {"value": "low", "label": "Low"}
+            {"value": "borderline", "label": "Borderline"},
+            {"value": "confident", "label": "Confident"},
         ]
     },
     {
         "type": "text",
         "columnName": "Notes",
-        "size": 100
+        "size": 60
     }
 ]
 
@@ -207,7 +209,7 @@ for i, form_schema_row in enumerate(FORM_SCHEMA):
             label_without_html = re.sub("<[^<]+?>", "", choice['label']).strip()
             first_letter = (label_without_html or choice["value"])[0]
             FORM_RADIO_BUTTON_KEYBOARD_SHORTCUTS[first_letter] = choice['value']
-
+            print(f"Form Keyboard Shortcut: {first_letter} => {choice['label']}")
 
 # parse or create FORM_RESPONSES dict for storing user responses
 FORM_RESPONSES = {}
@@ -226,8 +228,7 @@ if FORM_SCHEMA:
             df = parse_table(args.form_responses_table)
         except ValueError as e:
             p.error(str(e))
-
-        EXTRA_COLUMNS_IN_FORM_RESPONSES_TABLE = [c for c in df.columns if c not in FORM_SCHEMA_COLUMNS and c != PATH_COLUMN]
+        EXTRA_COLUMNS_IN_FORM_RESPONSES_TABLE = [c for c in df.columns if c not in FORM_SCHEMA_COLUMNS and c not in METADATA_COLUMNS and c != PATH_COLUMN]
     else:
         # make sure the table can be written out later
         if not os.access(os.path.dirname(args.form_responses_table), os.W_OK):

@@ -1,3 +1,4 @@
+import os
 from flask import request, Response
 from pprint import pprint, pformat
 from reviewer2 import args, RELATIVE_DIRECTORY_TO_DATA_FILES_LIST, FORM_SCHEMA, FORM_RESPONSES, \
@@ -82,7 +83,7 @@ def data_page_handler():
     for data_file_type, data_file_path in data_file_types_and_paths:
         if data_file_type != CONTENT_HTML_FILE_TYPE:
             continue
-        with open(data_file_path, "rt") as f:
+        with open(os.path.join(args.directory, data_file_path), "rt") as f:
             content_string = f.read()
             content_html_strings.append((data_file_path, content_string))
 

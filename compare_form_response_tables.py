@@ -22,7 +22,7 @@ def parse_args():
 
     try:
         if args.table1.endswith(".xls") or args.table1.endswith(".xlsx"):
-            df1 = pd.read_excel(args.table1)
+            df1 = pd.read_excel(args.table1, engine="openpyxl")
         else:
             df1 = pd.read_table(args.table1)
     except Exception as e:
@@ -30,7 +30,7 @@ def parse_args():
 
     try:
         if args.table2.endswith(".xls") or args.table2.endswith(".xlsx"):
-            df2 = pd.read_excel(args.table2)
+            df2 = pd.read_excel(args.table2, engine="openpyxl")
         else:
             df2 = pd.read_table(args.table2)
     except Exception as e:
@@ -48,8 +48,8 @@ def parse_args():
     if len(df2) == 0:
         p.error(f"{args.table2} is empty")
 
-    df1 = df1.set_index("Path")
-    df2 = df2.set_index("Path")
+    df1 = df1.set_index("Path").fillna("")
+    df2 = df2.set_index("Path").fillna("")
 
     if len(set(df1.index) & set(df2.index)) == 0:
         p.error(f"{args.table1} Path column values have 0 overlap with {args.table2} Path column values. Tables can only "
@@ -107,12 +107,12 @@ def compute_discordance_columns_func(suffix1, suffix2):
 def main():
     args, df1, df2 = parse_args()
     df_joined = df1.join(df2, lsuffix=f"_{args.suffix1}", rsuffix=f"_{args.suffix2}", how="outer").reset_index()
-    df_joined = df_joined.fillna('')
+    df_joined = df_joined.fillna("")
 
     #  print stats about input tables
     def get_counts_string(df, column, label="", sep=", "):
         return sep.join(
-            [f"{count:2d} {label} {key}" for key, count in sorted(collections.Counter(df[column]).items())])
+            [f"{count:2d} {label} {key}" for key, count in sorted(collections.Counter(df[column].fillna("<empty>")).items())])
 
     print("-"*20)
     df1_verdicts_counter = get_counts_string(df1, "Verdict")

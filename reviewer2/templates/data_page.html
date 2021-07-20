@@ -137,6 +137,7 @@
                                 {% endif %}
                                 {% set is_first_iter.value = False %}
                             {% endfor %}
+                            <div id="save-button" class="ui secondary basic button">Save</div>
                             <div id="save-status" style="display:none">
                                 <i class="icon"></i>
                                 <span></span>
@@ -194,10 +195,10 @@
         url: '/save',
         interruptRequests: true,
         method : 'POST',
-        on: 'keypress change',
+        on: 'click',
         serializeForm: true,
         throttleFirstRequest: false,
-        throttle: 300,
+        throttle: 250,
         beforeSend: function(settings) {
           console.log('Saving', settings.data)
           return settings
@@ -229,21 +230,21 @@
           $('#save-status').show()
         },
       }
-      $('form input[type=text]').api(apiSpec)
+      //$('form input[type=text]').api(apiSpec)
       $('.form .ui.radio').api(apiSpec)
-      //$('form .submit.button').api(apiSpec)
+      $('.form #save-button').api(apiSpec)
 
       //keyboard shortcuts
       const navigationKeyToSelectorMap = {
         "[": "#prevlink",
         "<": "#prevlink",
-        "p": "#prevlink",
-        "P": "#prevlink",
+        //"p": "#prevlink",
+        //"P": "#prevlink",
         "%": "#prevlink",  // left arrow ("%" == String.fromCharCode(37))
         "]": "#nextlink",
         ">": "#nextlink",
-        "n": "#nextlink",
-        "N": "#nextlink",
+        //"n": "#nextlink",
+        //"N": "#nextlink",
         "'": "#nextlink",  // right arrow ("'" == String.fromCharCode(39))
         //"h": "#homelink",
         //"t": "#homelink",
@@ -256,40 +257,47 @@
 
       const keyToSelectorMap = Object.assign({}, formKeyToSelectorMap, navigationKeyToSelectorMap)
 
-      $(document).keypress((event) => {
-        //console.warn(event.target.tagName, event.target.type, ": key", String.fromCharCode(event.keyCode), " (", event.keyCode, ") pressed")
-        if (event.metaKey || event.ctrlKey) {
-            return
-        }
-        if ((event.target.tagName || '').toLowerCase() == 'input' && event.target.type == 'text') {
-            return
-        }
-        const key = String.fromCharCode(event.keyCode)
-        const selector = keyToSelectorMap[key]
-        if (selector) {
-            const obj = $(selector)
-            if (obj.length > 0) {
-              obj[0].click()
-            }
-        }
-      })
       //handle arrow keys
       $(document).keydown((event) => {
-        //console.warn(event.target.tagName, event.target.type, ": key", String.fromCharCode(event.keyCode), " (", event.keyCode, ") down")
-        if (event.metaKey || event.ctrlKey || event.keyCode == 8) {
+        const key = event.key
+        //console.log(event.target.tagName, event.target.type, ": key", key, 'keyCode: ', String.fromCharCode(event.keyCode), " (", event.keyCode, ") down")
+        if (key == "Meta" || key == "Control" || key == "Alt" || event.keyCode == 8) {
             // trigger form save and return immediately for meta and delete keys. This enables expected behavior for Commmand-C, Command-V and similar shortcuts
-            $('form input[type=text]').api(Object.assign({}, apiSpec, {on: 'now'}))
+            // $('form input[type=text]').api(Object.assign({}, apiSpec, {on: 'now'}))
             return
-        } else {
-            $('form input[type=text]').api(apiSpec)
         }
-        if ((event.target.tagName || '').toLowerCase() == 'input') {
-            if (event.target.type == 'text') {
-                return
+        //else {
+        //    $('form input[type=text]').api(apiSpec)
+        //}
+
+        if (event.keyCode == 13) {
+          // 13 == Enter key
+          $('form input[type=text]').api(Object.assign({}, apiSpec, {on: 'now'}))
+          return
+        }
+
+        if ((event.target.tagName || '').toLowerCase() == 'input' && event.target.type == 'text') {
+          return
+        }
+
+        if (key) {
+            const selector = keyToSelectorMap[key]
+            //console.log('selector', selector)
+            if (selector) {
+                const obj = $(selector)
+                if (obj.length > 0) {
+                    //for some objects you need [0], while for others it only works with obj.click()
+                    obj[0].click()
+                    obj.click()
+                    return
+                } else {
+                    console.warn(`Selector not found: ${selector}`)
+                }
             }
         }
-        const key = String.fromCharCode(event.keyCode)
-        if (/[a-zA-Z0-9-_ ]/.test(key) && !(key.toLowerCase() in keyToSelectorMap) && !(key.toUpperCase() in keyToSelectorMap)) {
+
+        if (/^[a-zA-Z0-9-_ ]$/.test(key) && !(key.toLowerCase() in keyToSelectorMap) && !(key.toUpperCase() in keyToSelectorMap)) {
+            //console.log(`Focus triggered by ${key}`)
             $("input[type=text]").focus()
         }
 

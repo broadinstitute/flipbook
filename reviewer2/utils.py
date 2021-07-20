@@ -3,6 +3,7 @@ from jinja2 import Template
 import json
 import os
 import pkg_resources
+import sys
 from wcmatch import glob
 
 IMAGE_FILE_TYPE = "image"
@@ -22,6 +23,16 @@ def get_relative_directory_to_data_files_list(
     data_file_paths = []
 
     print(f"Looking for " + ", ".join(suffixes[:-1]) + f", and {suffixes[-1]} files in {top_level_dir}")
+    if keywords_to_include or keywords_to_exclude:
+        sys.stdout.write("Keeping only file paths that ")
+        if keywords_to_include:
+            sys.stdout.write("contain " + " or ".join([f'"{k}"' for k in keywords_to_include]))
+        if keywords_to_include and keywords_to_exclude:
+            sys.stdout.write(" and ")
+        if keywords_to_exclude:
+            sys.stdout.write("don't contain " + " or ".join([f'"{k}"' for k in keywords_to_exclude]))
+        sys.stdout.write("\n")
+
     glob_string = "|".join([f"{top_level_dir}/**/*{suffix}" for suffix in suffixes]).replace("\\", "/")
     matching_paths = glob.glob(glob_string, flags=glob.GLOBSTAR|glob.SPLIT)
     data_file_paths += matching_paths
