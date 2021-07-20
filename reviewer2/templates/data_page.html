@@ -99,11 +99,11 @@
                     <div class="ui divider"></div>
                     <form class="ui form" onsubmit="return false">
                         <input type="hidden" name="relative_directory" value="{{ relative_directory }}" />
-                        <div class="inline fields" style="white-space: nowrap">
+                        <div class="inline fields ui grid" style="white-space: nowrap">
                             {% set is_first_iter = namespace(value=True) %}
                             {% for form_schema_row in form_schema %}
                                 {% if form_schema_row["type"] == "radio" %}
-                                    <label for="{{ form_schema_row['name'] }}" style="margin-left: {{ 10 if is_first_iter.value else 35 }}px">
+                                    <label for="{{ form_schema_row['name'] }}" style="margin: 5px 0px 5px {{ 10 if is_first_iter.value else 35 }}px">
                                         {{ form_schema_row['inputLabel'] }}
                                     </label>
                                     {% for choice in form_schema_row['choices'] %}
@@ -123,7 +123,7 @@
                                         {% set tabindex.value = tabindex.value + 1 %}
                                     {% endfor %}
                                 {% elif form_schema_row["type"] == "text" %}
-                                    <div class="field" style="margin-left: 35px">
+                                    <div class="field" style="margin: 5px 0px 5px {{ 10 if is_first_iter.value else 35 }}px">
                                         <input type="text"
                                                name="{{ form_schema_row['name'] }}"
                                                size="{{ form_schema_row.get('size', 100) }}"
@@ -137,10 +137,12 @@
                                 {% endif %}
                                 {% set is_first_iter.value = False %}
                             {% endfor %}
-                            <div id="save-button" class="ui secondary basic button">Save</div>
-                            <div id="save-status" style="display:none">
-                                <i class="icon"></i>
-                                <span></span>
+                            <div style="margin: 5px 0px; display: inline-block">
+                                <div id="save-button" class="ui secondary basic button">Save</div>
+                                <div id="save-status" style="display:none">
+                                    <i class="icon"></i>
+                                    <span></span>
+                                </div>
                             </div>
                             <!-- div style="margin: 15px 0px 15px 35px" class="ui submit button">Save</div -->
                         </div>
