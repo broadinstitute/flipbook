@@ -1,0 +1,34 @@
+[
+  {
+    "type": "radio",
+    "columnName": "Verdict",
+    "choices": [
+      {"value": "good", "label": "<i class='thumbs up outline icon'></i> Good"},
+      {"value": "bad", "label": "<i class='thumbs down outline icon'></i> Bad"}
+    ]
+  },
+  {
+    "type": "radio",
+    "columnName": "Confidence",
+    "inputLabel": "Confidence",
+    "choices": [
+      {"value": "high", "label": "High"},
+      {"value": "low", "label": "Low"}
+    ]
+  },
+  {
+    "type": "text",
+    "columnName": "New RepeatNr",
+    "size": 10
+  },
+  {
+    "type": "text",
+    "columnName": "New CI",
+    "size": 20
+  },
+  {
+    "type": "text",
+    "columnName": "Notes",
+    "size": 100
+  }
+]
