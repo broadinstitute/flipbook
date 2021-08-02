@@ -35,7 +35,7 @@ p.add_argument("-m", "--metadata-table", default="reviewer2_metadata.tsv",
                     "directory paths will then display values from the other columns in this table. If both this table "
                     "and 'reviewer2_metadata.json' files are found, the values from this table will override values in "
                     "the 'reviewer2_metadata.json' files.")
-p.add_argument("--form-schema-json", help="Path of .json file containing a custom form schema. For the expected format "
+p.add_argument("-j", "--form-schema-json", help="Path of .json file containing a custom form schema. For the expected format "
                     "see https://github.com/broadinstitute/reviewer2/tree/main/form_schema_examples")
 p.add_argument("-s", "--sort-by", action="append", help="Order pages by metadata column(s)")
 p.add_argument("--hide-metadata-on-home-page", action="store_true", help="Don't show metadata columns in the "
