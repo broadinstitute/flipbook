@@ -28,3 +28,5 @@ or if one of the examples is what you want, then you can just pass in the url wi
 ```
 python3 -m reviewer2 --form-schema-json https://github.com/broadinstitute/reviewer2/blob/main/form_schema_examples/str_genotypes.json
 ```
+----
+If you'd like to put your own custom schema in this repo to make it easier to share with others, you're welcome to submit it via a github issue or pull request.
