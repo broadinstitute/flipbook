@@ -1,4 +1,4 @@
-## reviewer #2
+## FlipBook
 
 This tool starts a simple image server that lets you quickly flip through image files from a local directory using your web browser.
 Also, it optionally shows a customizable form where you can take notes or answer questions about each image or set of images.
@@ -18,29 +18,29 @@ Also, it optionally shows a customizable form where you can take notes or answer
 
 -------
 
-[![PyPI version](https://img.shields.io/pypi/v/reviewer2.svg?style=flat)](https://pypi.org/project/reviewer2/)  [![Supported Python versions](https://img.shields.io/pypi/pyversions/reviewer2.svg)](https://shields.io/)
+[![PyPI version](https://img.shields.io/pypi/v/flipbook.svg?style=flat)](https://pypi.org/project/flipbook/)  [![Supported Python versions](https://img.shields.io/pypi/pyversions/flipbook.svg)](https://shields.io/)
 
 
 ### Install:
 
 ```
-python3 -m pip install reviewer2  
+python3 -m pip install flipbook  
 ```
 
 ### Run:
 
 ```
-python3 -m reviewer2    # start server for all images in the current directory and subdirectories
+python3 -m flipbook    # start server for all images in the current directory and subdirectories
 ```
 
 Below are more examples. Run with `--help` to see all available options and their descriptions.
 
 ```
-python3 -m reviewer2 -x temp -x keyword2  /path/dir-with-images    #  -x are keyword(s) of paths to skip and /path/dir-with-images is the top level dir to search instead of the current dir
+python3 -m flipbook -x temp -x keyword2  /path/dir-with-images    #  -x are keyword(s) of paths to skip and /path/dir-with-images is the top level dir to search instead of the current dir
 
-python3 -m reviewer2 -t /path/user_responses.xls    #  change where user responses get saved (default: reviewer2_form_responses.tsv)
+python3 -m flipbook -t /path/user_responses.xls    #  change where user responses get saved (default: flipbook_form_responses.tsv)
 
-python3 -m reviewer2 -m /path/metadata.tsv          #  provide a metadata table 
+python3 -m flipbook -m /path/metadata.tsv          #  provide a metadata table 
 ```
 
 After the server is running, open your web browser to [http://localhost:8080](http://localhost:8080) to start reviewing images.
@@ -51,7 +51,7 @@ After the server is running, open your web browser to [http://localhost:8080](ht
   
   It's often useful to add extra info to the image pages to help with review - such as image descriptions, quality scores, etc.
   To enable this, there are several ways to specify arbitrary key-value pairs to add to specific image pages.
-  The 1st way is to put a file called `reviewer2_metadata.json` next to the image(s). All keys and values from this file
+  The 1st way is to put a file called `flipbook_metadata.json` next to the image(s). All keys and values from this file
   will appear on that image page. The 2nd way is to use `-m` to pass in a metadata table 
   (`.tsv` or `.xls`) with a `Path` column + arbitrary other columns. If the `Path` value matches the relative directory containing 
   the image(s), entries from that row will be added to this image page.  
@@ -61,19 +61,19 @@ After the server is running, open your web browser to [http://localhost:8080](ht
 
 - responses table (`-t`)
 
-  As you fill in the forms at the top of the image pages, the responses are written to this table. If you later restart reviewer2 with the same `-t`, it will reload previous responses. You can also optionally use this table to provide additional columns to display - sometimes this can be more convenient than using `-m`. 
+  As you fill in the forms at the top of the image pages, the responses are written to this table. If you later restart flipbook with the same `-t`, it will reload previous responses. You can also optionally use this table to provide additional columns to display - sometimes this can be more convenient than using `-m`. 
   
-  *Default*: `reviewer2_form_responses.tsv`
+  *Default*: `flipbook_form_responses.tsv`
 
 - custom form schema (`--form-schema-json`)  
    
-  If you'd like to use non-default questions in the image page forms, you can specify the path or url of a .json file containing a custom form schema. For examples of the expected format see [main/form_schema_examples](https://github.com/broadinstitute/reviewer2/tree/main/form_schema_examples)
+  If you'd like to use non-default questions in the image page forms, you can specify the path or url of a .json file containing a custom form schema. For examples of the expected format see [main/form_schema_examples](https://github.com/broadinstitute/flipbook/tree/main/form_schema_examples)
   
-- config file (`~/.reviewer2_config`)
+- config file (`~/.flipbook_config`)
 
   Most settings that can be provided on the command line can also be set via this YAML config file instead. For example:
 
-  *~/.reviewer2_config*
+  *~/.flipbook_config*
   ```
   form-schema-json: /path/to/my-schema.json
   hide-metadata-on-home-page: true
@@ -84,7 +84,7 @@ After the server is running, open your web browser to [http://localhost:8080](ht
   
 For more details, run:   
 ```
-python3 -m reviewer2 --help
+python3 -m flipbook --help
 ```
 
 ### Comparing reviews:
@@ -93,7 +93,7 @@ If 2 or more people review the same images, the reviews can be compared using th
 
 For example:
 ```
-python3 -m compare_form_response_tables egor_reviewer2_form_responses.tsv  ben_reviewer2_form_responses.tsv -o combined_responses.tsv -s1 egor -s2 ben
+python3 -m compare_form_response_tables egor_flipbook_form_responses.tsv  ben_flipbook_form_responses.tsv -o combined_responses.tsv -s1 egor -s2 ben
 ```
 
 This script will print concordance stats, and output a `combined_responses.tsv` table that contains one image per row as well as each person's review of the image.  
@@ -105,9 +105,9 @@ To see the full list of args and descriptions, run `python3 -m compare_form_resp
 To create a local dev instance, run
 
 ```
-git clone git@github.com:broadinstitute/reviewer2.git
-cd reviewer2
+git clone git@github.com:broadinstitute/flipbook.git
+cd flipbook
 
 # start server in dev mode so it reloads code on change
-python3 -m reviewer2 /path/dir-with-images --dev-mode
+python3 -m flipbook /path/dir-with-images --dev-mode
 ```

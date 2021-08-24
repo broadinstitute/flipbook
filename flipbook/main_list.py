@@ -1,9 +1,9 @@
 from flask import request, Response
 
-from reviewer2 import args, RELATIVE_DIRECTORY_TO_DATA_FILES_LIST, FORM_RESPONSES, FORM_SCHEMA_COLUMNS, \
+from flipbook import args, RELATIVE_DIRECTORY_TO_DATA_FILES_LIST, FORM_RESPONSES, FORM_SCHEMA_COLUMNS, \
     RELATIVE_DIRECTORY_TO_METADATA, METADATA_COLUMNS, EXTRA_DATA_IN_FORM_RESPONSES_TABLE, \
     EXTRA_COLUMNS_IN_FORM_RESPONSES_TABLE
-from reviewer2.utils import load_jinja_template, get_data_page_url
+from flipbook.utils import load_jinja_template, get_data_page_url
 
 MAIN_LIST_TEMPLATE = None
 

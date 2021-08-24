@@ -5,7 +5,7 @@ import os
 import pandas as pd
 import re
 import requests
-from reviewer2.utils import get_relative_directory_to_data_files_list, get_relative_directory_to_metadata, is_excel_table
+from flipbook.utils import get_relative_directory_to_data_files_list, get_relative_directory_to_metadata, is_excel_table
 
 
 PATH_COLUMN = 'Path'
@@ -15,35 +15,35 @@ p = configargparse.ArgumentParser(
     add_config_file_help=True,
     add_env_var_help=True,
     config_file_parser_class=configargparse.YAMLConfigFileParser,
-    default_config_files=["~/.reviewer2_config"],
+    default_config_files=["~/.flipbook_config"],
     args_for_writing_out_config_file=["--save-current-options-to-config-file"],
 )
 p.add_argument("-i", "--include", action="append", help="Only include files whose path contains this keyword")
 p.add_argument("-x", "--exclude", action="append", help="Skip files whose path contains this keyword. If both "
                     " --include and --exclude are specified, --exclude takes precedence over --include")
-p.add_argument("-t", "--form-responses-table", default="reviewer2_form_responses.tsv",
+p.add_argument("-t", "--form-responses-table", default="flipbook_form_responses.tsv",
                help="The .tsv or .xls path where form responses are saved. If the file already exists,"
                     "it will be parsed for previous form responses and then updated as the user fills in the form(s)."
                     "If the file doesn't exist, it will be created after the 1st form response.")
-p.add_argument("-m", "--metadata-table", default="reviewer2_metadata.tsv",
+p.add_argument("-m", "--metadata-table", default="flipbook_metadata.tsv",
                help="The .tsv or .xls path containing metadata to show on data pages. There are two optional ways "
-                    "to add metadata to the data pages. The 1st way is to put a 'reviewer2_metadata.json' file "
+                    "to add metadata to the data pages. The 1st way is to put a 'flipbook_metadata.json' file "
                     "inside a directory that contains images or data files (in which case any key-value pairs from "
                     "the json file will be shown at the top of the data page that displays those images). "
                     "The other way is to specify this table, which needs to have a 'Path' column with relative "
                     "directory paths that contain images and data files. The data page corresponding to those "
                     "directory paths will then display values from the other columns in this table. If both this table "
-                    "and 'reviewer2_metadata.json' files are found, the values from this table will override values in "
-                    "the 'reviewer2_metadata.json' files.")
+                    "and 'flipbook_metadata.json' files are found, the values from this table will override values in "
+                    "the 'flipbook_metadata.json' files.")
 p.add_argument("-j", "--form-schema-json", help="Path of .json file containing a custom form schema. For the expected format "
-                    "see https://github.com/broadinstitute/reviewer2/tree/main/form_schema_examples")
+                    "see https://github.com/broadinstitute/flipbook/tree/main/form_schema_examples")
 p.add_argument("-s", "--sort-by", action="append", help="Order pages by metadata column(s)")
 p.add_argument("--hide-metadata-on-home-page", action="store_true", help="Don't show metadata columns in the "
                "home page table")
 p.add_argument("--add-metadata-to-form-responses-table", action="store_true", help="Also write metadata columns to the "
                 "form responses table when saving users' form responses")
 
-#p.add_argument("-c", "--config-file", help="Path of yaml config file", env_var="REVIEWER2_CONFIG_FILE")
+#p.add_argument("-c", "--config-file", help="Path of yaml config file", env_var="FLIPBOOK_CONFIG_FILE")
 p.add_argument("-v", "--verbose", action='count', default=0, help="Print more info")
 p.add_argument("--host", default="127.0.0.1", env_var="HOST", help="Listen for connections on this hostname or IP")
 p.add_argument("-p", "--port", default="8080", env_var="PORT", type=int, help="Listen for connections on this port")
@@ -96,7 +96,7 @@ if not RELATIVE_DIRECTORY_TO_DATA_FILES_LIST:
     p.error(f"No images or data files found in {args.directory}")
 
 
-# parse metadata from reviewer2_metadata.json files
+# parse metadata from flipbook_metadata.json files
 METADATA_COLUMNS, RELATIVE_DIRECTORY_TO_METADATA = get_relative_directory_to_metadata(
     args.directory,
     RELATIVE_DIRECTORY_TO_DATA_FILES_LIST,
@@ -161,8 +161,8 @@ if args.form_schema_json:
             with open(args.form_schema_json, "rt") as f:
                 FORM_SCHEMA = json.load(f)
         elif args.form_schema_json.startswith("http"):
-            # Convert https://github.com/broadinstitute/reviewer2/blob/main/reviewer2/__init__.py to the raw url:
-            # https://raw.githubusercontent.com/broadinstitute/reviewer2/main/reviewer2/__init__.py
+            # Convert https://github.com/broadinstitute/flipbook/blob/main/flipbook/__init__.py to the raw url:
+            # https://raw.githubusercontent.com/broadinstitute/flipbook/main/flipbook/__init__.py
             github_match = re.search("//github.com/(.*)/blob/(.*)", args.form_schema_json)
             if github_match:
                 part1 = github_match.group(1)

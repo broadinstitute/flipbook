@@ -4,16 +4,16 @@ import jinja2
 import os
 import pkg_resources
 
-from reviewer2 import args
-from reviewer2.main_list import main_list_handler
-from reviewer2.data_page import data_page_handler
-from reviewer2.save import save_form_handler
+from flipbook import args
+from flipbook.main_list import main_list_handler
+from flipbook.data_page import data_page_handler
+from flipbook.save import save_form_handler
 
 
 def send_file(path):
     print(f"Sending {args.directory} {path}")
     if path.startswith("favicon"):
-        return Response(pkg_resources.resource_stream('reviewer2', 'icons/favicon.png'), mimetype='image/png')
+        return Response(pkg_resources.resource_stream('flipbook', 'icons/favicon.png'), mimetype='image/png')
 
     return send_from_directory(args.directory, path, as_attachment=True)
 

@@ -10,8 +10,8 @@ IMAGE_FILE_TYPE = "image"
 METADATA_JSON_FILE_TYPE = "metadata_json"
 CONTENT_HTML_FILE_TYPE = "content_html"
 
-METADATA_JSON_FILE_SUFFIX = "reviewer2_metadata.json"
-CONTENT_HTML_FILE_SUFFIX = "reviewer2_content.html"
+METADATA_JSON_FILE_SUFFIX = "flipbook_metadata.json"
+CONTENT_HTML_FILE_SUFFIX = "flipbook_content.html"
 
 
 def get_relative_directory_to_data_files_list(
@@ -107,7 +107,7 @@ def get_relative_directory_to_data_files_list(
 def get_relative_directory_to_metadata(top_level_dir, relative_directory_to_data_files_list, verbose=False):
     metadata_columns = collections.OrderedDict()
     relative_directory_to_metadata = {}
-    # parse the reviewer2_metadata.json file from each directory
+    # parse the flipbook_metadata.json file from each directory
     for relative_dir, data_files_list in relative_directory_to_data_files_list:
         for data_file_type, data_file_path in data_files_list:
             if data_file_type != METADATA_JSON_FILE_TYPE:
@@ -149,4 +149,4 @@ def get_data_page_url(page_number, last):
 
 
 def load_jinja_template(name):
-    return Template(pkg_resources.resource_stream("reviewer2", f"templates/{name}.html").read().decode('UTF-8'))
+    return Template(pkg_resources.resource_stream("flipbook" , f"templates/{name}.html").read().decode('UTF-8'))
