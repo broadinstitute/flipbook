@@ -8,6 +8,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-serialize-object/2.5.0/jquery.serialize-object.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/purl/2.3.1/purl.min.js"></script>
 
     <link rel="icon" href="/favicon2.png" type="image/x-icon"/>
     <title>FlipBook: {{ relative_directory }}</title>
@@ -182,6 +183,16 @@
         </div>
     </div>
     <script type="text/javascript">
+      //add path to url to so that saved links or bookmarks can be robust to different sort orders
+      let urlParams = $.url(window.location.href).param()
+      urlParams["path"] = "{{ relative_directory }}"
+      urlParams["i"] = "{{ i }}"
+      urlParams["last"] = "{{ last }}"
+      let urlPath = window.location.pathname.split("?")[0]
+      let urlUpdatedParams = $.param(urlParams)
+      window.history.replaceState(null, null, `${urlPath}?${urlUpdatedParams}`);
+
+
       //misc. init
       $('.ui.radio.checkbox').checkbox();
 

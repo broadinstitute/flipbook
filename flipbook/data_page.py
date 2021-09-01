@@ -35,7 +35,20 @@ def data_page_handler():
         print(f"data_page_handler request.__dict__: {pformat(request.__dict__)}")
         print(f"data_page_handler params: {params}")
 
-    i = params.get("i")
+    i = None
+    relative_dir = params.get("path")
+    if relative_dir:
+        # override i
+        for idx, (known_relative_dir, _) in enumerate(RELATIVE_DIRECTORY_TO_DATA_FILES_LIST):
+            if relative_dir == known_relative_dir:
+                i = idx + 1
+                break
+        else:
+            print(f"ERROR: path param '{relative_dir}' not recognized. Falling back on using i param.")
+
+    if i is None:
+        i = params.get("i")
+
     try:
         if isinstance(i, list):
             i = int(i[0])

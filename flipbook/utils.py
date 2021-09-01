@@ -15,11 +15,11 @@ CONTENT_HTML_FILE_SUFFIX = "flipbook_content.html"
 
 
 def get_relative_directory_to_data_files_list(
-    top_level_dir,
-    keywords_to_include,
-    keywords_to_exclude,
-    suffixes=("svg", "png", "jpeg", "jpg", "gif", "webp", CONTENT_HTML_FILE_SUFFIX, METADATA_JSON_FILE_SUFFIX),
-    verbose=False):
+        top_level_dir,
+        keywords_to_include,
+        keywords_to_exclude,
+        suffixes=("svg", "png", "jpeg", "jpg", "gif", "webp", CONTENT_HTML_FILE_SUFFIX, METADATA_JSON_FILE_SUFFIX),
+        verbose=False):
     data_file_paths = []
 
     print(f"Looking for " + ", ".join(suffixes[:-1]) + f", and {suffixes[-1]} files in {top_level_dir}")
