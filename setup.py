@@ -29,10 +29,15 @@ install_requires = [
 
 setup(
     name='flipbook',
-    version="0.10",
+    version="0.10.1",
     description="Starts a simple image server that lets you quickly flip through image files from a local directory "
                 "using your web browser and optionally answering customizable questions about each one",
     install_requires=install_requires,
+    entry_points = {
+        'console_scripts': [
+            'flipbook = flipbook',
+        ],
+    },
     long_description_content_type="text/markdown",
     long_description=long_description,
     packages=["flipbook"],
