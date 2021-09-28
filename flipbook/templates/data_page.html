@@ -10,7 +10,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-serialize-object/2.5.0/jquery.serialize-object.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/purl/2.3.1/purl.min.js"></script>
 
-    <link rel="icon" href="/favicon2.png" type="image/x-icon"/>
     <title>FlipBook: {{ relative_directory }}</title>
     <style>
         .img-default-view {
@@ -67,7 +66,7 @@
                         </div>
                         <div class="three wide column">
                             <span style="margin-left: 30px">
-                                <a id="homelink" href="/" style="white-space: nowrap">
+                                <a id="homelink" href="{{ './index.html' if is_static_website else '/'}}" style="white-space: nowrap">
                                     <i class="home icon"></i> &nbsp; table
                                     <!-- span style="margin-left: 10px" class="keyboard-shortcut">h or t</span -->
                                 </a>
@@ -160,7 +159,7 @@
                         {% endif %}
                     </div>
 
-                    <img class="img-default-view" src="/{{ image_file_path }}?cache={{ image_file_path | ctime}}" tabindex="{{ tabindex.value }}"/>
+                    <img class="img-default-view" src="{{ image_file_path }}?cache={{ image_file_path | ctime}}" tabindex="{{ tabindex.value }}"/>
                     {% set tabindex.value = tabindex.value + 1 %}
                     {% set section_counter.value = section_counter.value + 1 %}
                 {% endfor %}
@@ -184,14 +183,15 @@
     </div>
     <script type="text/javascript">
       //add path to url to so that saved links or bookmarks can be robust to different sort orders
-      let urlParams = $.url(window.location.href).param()
-      urlParams["path"] = "{{ relative_directory }}"
-      urlParams["i"] = "{{ i }}"
-      urlParams["last"] = "{{ last }}"
-      let urlPath = window.location.pathname.split("?")[0]
-      let urlUpdatedParams = $.param(urlParams)
-      window.history.replaceState(null, null, `${urlPath}?${urlUpdatedParams}`);
-
+      {% if not is_static_website %}
+          let urlParams = $.url(window.location.href).param()
+          urlParams["path"] = "{{ relative_directory }}"
+          urlParams["i"] = "{{ i }}"
+          urlParams["last"] = "{{ last }}"
+          let urlPath = window.location.pathname.split("?")[0]
+          let urlUpdatedParams = $.param(urlParams)
+          window.history.replaceState(null, null, `${urlPath}?${urlUpdatedParams}`);
+      {% endif %}
 
       //misc. init
       $('.ui.radio.checkbox').checkbox();

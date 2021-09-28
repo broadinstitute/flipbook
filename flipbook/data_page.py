@@ -2,13 +2,15 @@ import os
 from flask import request, Response
 from pprint import pprint, pformat
 from flipbook import args, RELATIVE_DIRECTORY_TO_DATA_FILES_LIST, FORM_SCHEMA, FORM_RESPONSES, \
-    RELATIVE_DIRECTORY_TO_METADATA, FORM_RADIO_BUTTON_KEYBOARD_SHORTCUTS, EXTRA_DATA_IN_FORM_RESPONSES_TABLE
-from flipbook.utils import load_jinja_template, get_data_page_url, CONTENT_HTML_FILE_TYPE, IMAGE_FILE_TYPE
+    RELATIVE_DIRECTORY_TO_METADATA, FORM_RADIO_BUTTON_KEYBOARD_SHORTCUTS, EXTRA_DATA_IN_FORM_RESPONSES_TABLE, \
+    get_static_data_page_url
+from flipbook.utils import load_jinja_template, get_data_page_url, CONTENT_HTML_FILE_TYPE, \
+    IMAGE_FILE_TYPE
 
 DATA_PAGE_TEMPLATE = None
 
 
-def data_page_handler():
+def data_page_handler(is_static_website=False):
     global DATA_PAGE_TEMPLATE
     if DATA_PAGE_TEMPLATE is None or args.dev_mode:
         DATA_PAGE_TEMPLATE = load_jinja_template("data_page")
@@ -112,10 +114,11 @@ def data_page_handler():
         image_file_paths=image_file_paths,
         metadata_json_dict=metadata_json_dict,
         content_html_strings=content_html_strings,
-        get_data_page_url=get_data_page_url,
-        form_schema=FORM_SCHEMA,
-        form_radio_button_keyboard_shortcuts=FORM_RADIO_BUTTON_KEYBOARD_SHORTCUTS,
+        get_data_page_url=get_data_page_url if not is_static_website else get_static_data_page_url,
+        form_schema=FORM_SCHEMA if not is_static_website else [],
+        form_radio_button_keyboard_shortcuts=FORM_RADIO_BUTTON_KEYBOARD_SHORTCUTS if not is_static_website else {},
         form_responses=FORM_RESPONSES.get(relative_dir, {}),
+        is_static_website=is_static_website,
     )
 
     return Response(html, mimetype='text/html')

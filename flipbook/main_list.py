@@ -2,13 +2,13 @@ from flask import request, Response
 
 from flipbook import args, RELATIVE_DIRECTORY_TO_DATA_FILES_LIST, FORM_RESPONSES, FORM_SCHEMA_COLUMNS, \
     RELATIVE_DIRECTORY_TO_METADATA, METADATA_COLUMNS, EXTRA_DATA_IN_FORM_RESPONSES_TABLE, \
-    EXTRA_COLUMNS_IN_FORM_RESPONSES_TABLE
+    EXTRA_COLUMNS_IN_FORM_RESPONSES_TABLE, get_static_data_page_url
 from flipbook.utils import load_jinja_template, get_data_page_url
 
 MAIN_LIST_TEMPLATE = None
 
 
-def main_list_handler():
+def main_list_handler(is_static_website=False):
     global MAIN_LIST_TEMPLATE
     if MAIN_LIST_TEMPLATE is None or args.dev_mode:
         MAIN_LIST_TEMPLATE = load_jinja_template("main_list")
@@ -32,12 +32,13 @@ def main_list_handler():
 
     html = MAIN_LIST_TEMPLATE.render(
         data_files_list=data_files_list,
-        get_data_page_url=get_data_page_url,
+        get_data_page_url=get_data_page_url if not is_static_website else get_static_data_page_url,
         form_column_names=FORM_SCHEMA_COLUMNS,
         form_responses_dict=FORM_RESPONSES,
         metadata_column_names=metadata_columns,
         metadata_dict=metadata_dict,
         form_responses_table_path=args.form_responses_table,
+        is_static_website=is_static_website,
     )
 
     return Response(html, mimetype='text/html')

@@ -7,12 +7,17 @@ import json
 import os
 import pandas as pd
 import pkg_resources
+import pkgutil
 import re
 import requests
-from flipbook.utils import get_relative_directory_to_data_files_list, get_relative_directory_to_metadata, is_excel_table
+import shutil
+import sys
 
+from flipbook.utils import get_relative_directory_to_data_files_list, get_relative_directory_to_metadata, \
+    is_excel_table, get_data_page_url, METADATA_JSON_FILE_TYPE, CONTENT_HTML_FILE_TYPE
 
 PATH_COLUMN = 'Path'
+WEBSITE_DIR = "flipbook_html"
 
 p = configargparse.ArgumentParser(
     formatter_class=configargparse.DefaultsFormatter,
@@ -24,7 +29,7 @@ p = configargparse.ArgumentParser(
 )
 p.add_argument("-i", "--include", action="append", help="Only include files whose path contains this keyword")
 p.add_argument("-x", "--exclude", action="append", help="Skip files whose path contains this keyword. If both "
-                    " --include and --exclude are specified, --exclude takes precedence over --include")
+               " --include and --exclude are specified, --exclude takes precedence over --include", default=[WEBSITE_DIR])
 p.add_argument("-t", "--form-responses-table", default="flipbook_form_responses.tsv",
                help="The .tsv or .xls path where form responses are saved. If the file already exists,"
                     "it will be parsed for previous form responses and then updated as the user fills in the form(s)."
@@ -40,12 +45,19 @@ p.add_argument("-m", "--metadata-table", default="flipbook_metadata.tsv",
                     "and 'flipbook_metadata.json' files are found, the values from this table will override values in "
                     "the 'flipbook_metadata.json' files.")
 p.add_argument("-j", "--form-schema-json", help="Path of .json file containing a custom form schema. For the expected format "
-                    "see https://github.com/broadinstitute/flipbook/tree/main/form_schema_examples")
+               "see https://github.com/broadinstitute/flipbook/tree/main/form_schema_examples")
 p.add_argument("-s", "--sort-by", action="append", help="Order pages by metadata column(s)")
 p.add_argument("--hide-metadata-on-home-page", action="store_true", help="Don't show metadata columns in the "
                "home page table")
 p.add_argument("--add-metadata-to-form-responses-table", action="store_true", help="Also write metadata columns to the "
-                "form responses table when saving users' form responses")
+               "form responses table when saving users' form responses")
+
+p.add_argument("--generate-static-website", action="store_true", help="Instead of starting a web server, this option "
+               "causes FlipBook to write out a set of static html pages for all the images it finds and then exit. "
+               "The generated pages can then be viewed in a browser, uploaded to some other web server (such as "
+               "GitHub Pages, embedded in another existing website, etc. The generated web pages are identical to "
+               "the standard FlipBook user interface except they don't contain the forms for entering responses about "
+               "each image - and so just allow flipping through the images.")
 
 #p.add_argument("-c", "--config-file", help="Path of yaml config file", env_var="FLIPBOOK_CONFIG_FILE")
 p.add_argument("-v", "--verbose", action='count', default=0, help="Print more info")
@@ -294,19 +306,53 @@ def send_file(path):
     return send_from_directory(args.directory, path, as_attachment=True)
 
 
+def get_static_data_page_url(page_number, last):
+    i = page_number - 1
+    if i < 0 or i >= len(RELATIVE_DIRECTORY_TO_DATA_FILES_LIST):
+        raise ValueError(f"page_number arg is out of bounds. It must be between 1 and {len(RELATIVE_DIRECTORY_TO_DATA_FILES_LIST)}")
+
+    relative_dir, _ = RELATIVE_DIRECTORY_TO_DATA_FILES_LIST[i]
+    name = relative_dir.replace("/", "__")
+    return f"page_{name}.html"
+
+
 def main():
+    # add a ctime(..) function to allow the last-changed-time of a path to be computed within a jinja template
+    jinja2.environment.DEFAULT_FILTERS['ctime'] = lambda path: int(os.path.getctime(path)) if os.path.isfile(path) else 0
 
     from flipbook.main_list import main_list_handler
     from flipbook.data_page import data_page_handler
     from flipbook.save import save_form_handler
 
     app = Flask(__name__)
+
+    if args.generate_static_website:
+        os.makedirs(WEBSITE_DIR, exist_ok=True)
+
+        with open(os.path.join(WEBSITE_DIR, "index.html"), "wt") as f:
+            f.write(main_list_handler(is_static_website=True).get_data(as_text=True))
+        with open(os.path.join(WEBSITE_DIR, "favicon.png"), "wb") as f:
+            f.write(pkgutil.get_data('flipbook', 'icons/favicon.png'))
+
+        last_page_number = len(RELATIVE_DIRECTORY_TO_DATA_FILES_LIST)
+        for i, (relative_directory, data_file_types_and_paths) in enumerate(RELATIVE_DIRECTORY_TO_DATA_FILES_LIST):
+            page_number = i + 1
+            with app.test_request_context(get_data_page_url(page_number, last_page_number)):
+                page_dir = os.path.join(WEBSITE_DIR, relative_directory)
+                os.makedirs(page_dir, exist_ok=True)
+                for data_file_type, data_file in data_file_types_and_paths:
+                    if data_file_type in (METADATA_JSON_FILE_TYPE, CONTENT_HTML_FILE_TYPE):
+                        continue
+                    print("Copying", data_file_type, data_file, "to", page_dir)
+                    shutil.copy(data_file, page_dir)
+
+                with open(os.path.join(WEBSITE_DIR, get_static_data_page_url(page_number, last_page_number)), "wt") as f:
+                    f.write(data_page_handler(is_static_website=True).get_data(as_text=True))
+        print(f"Done. Generated static website in the ./{WEBSITE_DIR}/ directory.")
+        sys.exit(0)
+
+    # start web server
     CORS(app)
-
-    # add a ctime(..) function to allow the last-changed-time of a path to be computed within a jinja template
-    jinja2.environment.DEFAULT_FILTERS['ctime'] = lambda path: int(os.path.getctime(path)) if os.path.isfile(path) else 0
-
-    #app.add_template_filter(lambda path: int(os.path.getctime(path)) if os.path.isfile(path) else 0, name="ctime")
 
     app.url_map.strict_slashes = False
 
