@@ -25,7 +25,9 @@ def main_list_handler(is_static_website=False):
     metadata_columns = []
     metadata_dict = {}
     if not args.hide_metadata_on_home_page:
-        metadata_columns = METADATA_COLUMNS + EXTRA_COLUMNS_IN_FORM_RESPONSES_TABLE
+        metadata_columns = METADATA_COLUMNS
+        if not is_static_website:
+            metadata_columns += EXTRA_COLUMNS_IN_FORM_RESPONSES_TABLE
         for relative_dir in list(RELATIVE_DIRECTORY_TO_METADATA.keys()) + list(EXTRA_DATA_IN_FORM_RESPONSES_TABLE.keys()):
             metadata_dict[relative_dir] = dict(RELATIVE_DIRECTORY_TO_METADATA.get(relative_dir, {}))
             metadata_dict[relative_dir].update(dict(EXTRA_DATA_IN_FORM_RESPONSES_TABLE.get(relative_dir, {})))
@@ -33,7 +35,7 @@ def main_list_handler(is_static_website=False):
     html = MAIN_LIST_TEMPLATE.render(
         data_files_list=data_files_list,
         get_data_page_url=get_data_page_url if not is_static_website else get_static_data_page_url,
-        form_column_names=FORM_SCHEMA_COLUMNS,
+        form_column_names=FORM_SCHEMA_COLUMNS if not is_static_website else [],
         form_responses_dict=FORM_RESPONSES,
         metadata_column_names=metadata_columns,
         metadata_dict=metadata_dict,
