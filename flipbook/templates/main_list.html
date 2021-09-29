@@ -37,7 +37,9 @@
         <div class="row">
             <div class="one wide column"></div>
             <div class="fourteen wide column">
-                {% if not is_static_website %}
+                {% if header_html %}
+                    {{ header_html }}
+                {% else %}
                     <div style="font-size: 12pt">
                         {% if form_column_names %}
                             <b>{{ form_responses_dict|length }} out of {{ data_files_list|length }} rows</b> currently have entries in {{ form_responses_table_path }}

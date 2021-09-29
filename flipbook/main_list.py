@@ -1,8 +1,9 @@
-from flask import request, Response
+import os
 
+from flask import request, Response
 from flipbook import args, RELATIVE_DIRECTORY_TO_DATA_FILES_LIST, FORM_RESPONSES, FORM_SCHEMA_COLUMNS, \
     RELATIVE_DIRECTORY_TO_METADATA, METADATA_COLUMNS, EXTRA_DATA_IN_FORM_RESPONSES_TABLE, \
-    EXTRA_COLUMNS_IN_FORM_RESPONSES_TABLE, get_static_data_page_url
+    EXTRA_COLUMNS_IN_FORM_RESPONSES_TABLE, get_static_data_page_url, MAIN_PAGE_HEADER_FILENAME
 from flipbook.utils import load_jinja_template, get_data_page_url
 
 MAIN_LIST_TEMPLATE = None
@@ -14,7 +15,7 @@ def main_list_handler(is_static_website=False):
         MAIN_LIST_TEMPLATE = load_jinja_template("main_list")
 
     if args.verbose:
-        print(f"main_list_handler recieved {request.url}")
+        print(f"main_list_handler received {request.url}")
 
     data_files_list = [
         (page_number + 1, relative_directory, data_file_types_and_paths)
@@ -32,7 +33,13 @@ def main_list_handler(is_static_website=False):
             metadata_dict[relative_dir] = dict(RELATIVE_DIRECTORY_TO_METADATA.get(relative_dir, {}))
             metadata_dict[relative_dir].update(dict(EXTRA_DATA_IN_FORM_RESPONSES_TABLE.get(relative_dir, {})))
 
+    main_page_header_html = ""
+    if os.path.isfile(os.path.join(args.directory, MAIN_PAGE_HEADER_FILENAME)):
+        with open(os.path.join(args.directory, MAIN_PAGE_HEADER_FILENAME), "rt") as f:
+            main_page_header_html = f.read()
+
     html = MAIN_LIST_TEMPLATE.render(
+        header_html=main_page_header_html,
         data_files_list=data_files_list,
         get_data_page_url=get_data_page_url if not is_static_website else get_static_data_page_url,
         form_column_names=FORM_SCHEMA_COLUMNS,
