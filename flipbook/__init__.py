@@ -348,7 +348,8 @@ def main():
 
                 with open(os.path.join(WEBSITE_DIR, get_static_data_page_url(page_number, last_page_number)), "wt") as f:
                     f.write(data_page_handler(is_static_website=True).get_data(as_text=True))
-        print(f"Done. Generated static website in the ./{WEBSITE_DIR}/ directory.")
+        print("Done")
+        print(f"Generated static website in the ./{WEBSITE_DIR} directory")
         sys.exit(0)
 
     # start web server
