@@ -115,8 +115,8 @@ def data_page_handler(is_static_website=False):
         metadata_json_dict=metadata_json_dict,
         content_html_strings=content_html_strings,
         get_data_page_url=get_data_page_url if not is_static_website else get_static_data_page_url,
-        form_schema=FORM_SCHEMA if not is_static_website else [],
-        form_radio_button_keyboard_shortcuts=FORM_RADIO_BUTTON_KEYBOARD_SHORTCUTS if not is_static_website else {},
+        form_schema=FORM_SCHEMA,
+        form_radio_button_keyboard_shortcuts=FORM_RADIO_BUTTON_KEYBOARD_SHORTCUTS,
         form_responses=FORM_RESPONSES.get(relative_dir, {}),
         is_static_website=is_static_website,
     )

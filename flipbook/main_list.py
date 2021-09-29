@@ -35,7 +35,7 @@ def main_list_handler(is_static_website=False):
     html = MAIN_LIST_TEMPLATE.render(
         data_files_list=data_files_list,
         get_data_page_url=get_data_page_url if not is_static_website else get_static_data_page_url,
-        form_column_names=FORM_SCHEMA_COLUMNS if not is_static_website else [],
+        form_column_names=FORM_SCHEMA_COLUMNS,
         form_responses_dict=FORM_RESPONSES,
         metadata_column_names=metadata_columns,
         metadata_dict=metadata_dict,
@@ -44,5 +44,4 @@ def main_list_handler(is_static_website=False):
     )
 
     return Response(html, mimetype='text/html')
-
 

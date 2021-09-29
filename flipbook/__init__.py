@@ -170,6 +170,9 @@ FORM_SCHEMA = [
     }
 ]
 
+if args.generate_static_website:
+    FORM_SCHEMA = {}
+
 if args.form_schema_json:
     print(f"Loading form schema from {args.form_schema_json}")
     try:
