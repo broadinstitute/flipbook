@@ -26,7 +26,7 @@ def get_relative_directory_to_data_files_list(
     if keywords_to_include or keywords_to_exclude:
         sys.stdout.write("Keeping only file paths that ")
         if keywords_to_include:
-            sys.stdout.write("contain " + " or ".join([f'"{k}"' for k in keywords_to_include]))
+            sys.stdout.write("contain " + " and ".join([f'"{k}"' for k in keywords_to_include]))
         if keywords_to_include and keywords_to_exclude:
             sys.stdout.write(" and ")
         if keywords_to_exclude:
@@ -55,10 +55,10 @@ def get_relative_directory_to_data_files_list(
         relative_data_file_path = os.path.relpath(data_file_path, top_level_dir)
 
         if keywords_to_include:
-            included_keyword_matches = [k for k in keywords_to_include if k in relative_data_file_path] if keywords_to_include else []
-            if not included_keyword_matches:
+            included_keyword_misses = [k for k in keywords_to_include if k not in relative_data_file_path] if keywords_to_include else []
+            if included_keyword_misses:
                 if verbose:
-                    print(f"Skipping {data_file_suffix} file: {relative_data_file_path} - it doesn't contain any --include keyword.")
+                    print(f"Skipping {data_file_suffix} file: {relative_data_file_path} - it doesn't contain --include keyword(s): ", ", ".join(included_keyword_misses))
                 continue
 
         excluded_keyword_matches = [k for k in keywords_to_exclude if k in relative_data_file_path] if keywords_to_exclude else []

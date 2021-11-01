@@ -48,6 +48,7 @@ p.add_argument("-m", "--metadata-table", default="flipbook_metadata.tsv",
 p.add_argument("-j", "--form-schema-json", help="Path of .json file containing a custom form schema. For the expected format "
                "see https://github.com/broadinstitute/flipbook/tree/main/form_schema_examples")
 p.add_argument("-s", "--sort-by", action="append", help="Order pages by metadata column(s)")
+p.add_argument("-r", "--reverse-sort", action="store_true", help="Reverses the sort order")
 p.add_argument("--hide-metadata-on-home-page", action="store_true", help="Don't show metadata columns in the "
                "home page table")
 p.add_argument("--add-metadata-to-form-responses-table", action="store_true", help="Also write metadata columns to the "
@@ -299,7 +300,7 @@ if args.sort_by:
                 continue
         return tuple(sort_key)
 
-    RELATIVE_DIRECTORY_TO_DATA_FILES_LIST = sorted(RELATIVE_DIRECTORY_TO_DATA_FILES_LIST, key=get_sort_key)
+    RELATIVE_DIRECTORY_TO_DATA_FILES_LIST = sorted(RELATIVE_DIRECTORY_TO_DATA_FILES_LIST, key=get_sort_key, reverse=args.reverse_sort)
 
 
 def send_file(path):
@@ -373,7 +374,13 @@ def main():
     if args.verbose:
         print(f"Connecting to {host}:{port}")
 
-    app.run(
-        debug=args.dev_mode,
-        host=host,
-        port=port)
+    try:
+        app.run(
+            debug=args.dev_mode,
+            host=host,
+            port=port)
+    except OSError as e:
+        if "already in use" in str(e):
+            p.error(f"Port {port} is already in use by another process. Use -p to specify a different port.")
+        else:
+            raise e
