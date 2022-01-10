@@ -41,11 +41,15 @@
 </head>
 <body style="overflow-x: scroll">
     {% set tabindex = namespace(value=1000) %}
-    <a name="top"></a>
+    <a id="top" name="top"></a>
     <div class="ui stackable grid" style="margin-top: 1px">
         <div class="row">
             <div class="one wide column"></div>
             <div class="fourteen wide column">
+                {% if header_html %}
+                    {{ header_html }}
+                {% endif %}
+
                 <div class="ui stackable grid">
                     <div class="row">
                         <div class="three wide column" style="white-space: nowrap; min-width: 220px">

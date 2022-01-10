@@ -3,7 +3,7 @@ from flask import request, Response
 from pprint import pprint, pformat
 from flipbook import args, RELATIVE_DIRECTORY_TO_DATA_FILES_LIST, FORM_SCHEMA, FORM_RESPONSES, \
     RELATIVE_DIRECTORY_TO_METADATA, FORM_RADIO_BUTTON_KEYBOARD_SHORTCUTS, EXTRA_DATA_IN_FORM_RESPONSES_TABLE, \
-    get_static_data_page_url
+    get_static_data_page_url, DATA_PAGE_HEADER_FILENAME
 from flipbook.utils import load_jinja_template, get_data_page_url, CONTENT_HTML_FILE_TYPE, \
     IMAGE_FILE_TYPE
 
@@ -107,9 +107,15 @@ def data_page_handler(is_static_website=False):
               f"{len(image_file_paths)} image_file_paths, {len(metadata_json_dict)} records in metadata_json_dict, "
               f"{len(content_html_strings)} content_html_strings")
 
+    data_page_header_html = ""
+    if os.path.isfile(os.path.join(args.directory, DATA_PAGE_HEADER_FILENAME)):
+        with open(os.path.join(args.directory, DATA_PAGE_HEADER_FILENAME), "rt") as f:
+            data_page_header_html = f.read()
+
     html = DATA_PAGE_TEMPLATE.render(
         i=i,
         last=last,
+        header_html=data_page_header_html,
         relative_directory=relative_dir,
         image_file_paths=image_file_paths,
         metadata_json_dict=metadata_json_dict,

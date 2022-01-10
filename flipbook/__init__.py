@@ -19,6 +19,7 @@ from flipbook.utils import get_relative_directory_to_data_files_list, get_relati
 PATH_COLUMN = 'Path'
 WEBSITE_DIR = "flipbook_html"
 MAIN_PAGE_HEADER_FILENAME = "flipbook_main_page_header.html"
+DATA_PAGE_HEADER_FILENAME = "flipbook_data_page_header.html"
 
 p = configargparse.ArgumentParser(
     formatter_class=configargparse.DefaultsFormatter,
