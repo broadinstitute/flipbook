@@ -15,6 +15,9 @@ It also optionally shows a form where you can take notes or answer questions abo
 - web interface: home page lists all images
 - web interface: image pages show the image, an optional customizable form where you can take notes or answer questions about the image, next/previous page links, and optional other customizable info for context
 - use subdirectories to group images. Any images found in the same subdirectory will be shown on the same page  
+- optionally generate a static html website to share your images and form responses publicly. Example @ [https://broadinstitute.github.io/StrPileups/index.html](https://broadinstitute.github.io/StrPileups/index.html)
+
+
 
 -------
 
@@ -33,7 +36,7 @@ python3 -m pip install flipbook
 python3 -m flipbook    # start server for all images in the current directory and subdirectories
 ```
 
-Below are more examples. Run with `--help` to see all available options and their descriptions.
+Below are more example command lines. Run with `--help` to see all available options and their descriptions.
 
 ```
 python3 -m flipbook -x temp -x keyword2  /path/dir-with-images    #  -x are keyword(s) of paths to skip and /path/dir-with-images is the top level dir to search instead of the current dir
@@ -44,6 +47,19 @@ python3 -m flipbook -m /path/metadata.tsv          #  provide a metadata table
 ```
 
 After the server is running, open your web browser to [http://localhost:8080](http://localhost:8080) to start reviewing images.
+
+
+### Screenshots
+
+Image page:
+
+<img width="1781" alt="image" src="https://user-images.githubusercontent.com/6240170/208694093-b5e7c97d-d2a4-46ab-9852-5db7157a2a3d.png">
+
+
+Home page:
+
+<img width="1786" alt="image" src="https://user-images.githubusercontent.com/6240170/208694216-0a550c82-cca2-4212-b22f-134844da95a5.png">
+
 
 ### Options:
 
