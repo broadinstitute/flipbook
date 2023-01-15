@@ -306,8 +306,11 @@ if args.sort_by:
 
 def send_file(path):
     print(f"Sending {args.directory} {path}")
-    if path.startswith("favicon"):
-        return Response(pkg_resources.resource_stream('flipbook', 'icons/favicon.png'), mimetype='image/png')
+    if path.startswith("/static/"):
+        mimetype = None
+        if path.endswith(".png"):
+            mimetype="image/png"
+        return Response(pkg_resources.resource_stream('flipbook', path), mimetype=mimetype)
 
     return send_from_directory(args.directory, path, as_attachment=True)
 

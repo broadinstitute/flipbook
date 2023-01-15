@@ -29,7 +29,7 @@ install_requires = [
 
 setup(
     name='flipbook',
-    version="0.11.4",
+    version="0.11.5",
     description="Starts a simple image server that lets you quickly flip through image files from a local directory "
                 "using your web browser and optionally answering customizable questions about each one",
     install_requires=install_requires,
@@ -43,7 +43,13 @@ setup(
     packages=["flipbook"],
     py_modules=["compare_form_response_tables"],
     include_package_data=True,
-    package_data={'': ['*/*.png', '*/*.html']},
+    package_data={'': [
+        'static/*/*.*',
+        'static/*/*/*.*',
+        'static/*/*/*/*.*',
+        'static/*/*/*/*/*.*',
+        'static/*/*/*/*/*/*.*'
+    ]},
     python_requires=">=3.7",
     license="MIT",
     keywords='curation, NGS, sequencing, STRs, REviewer, read visualization, machine learning',
