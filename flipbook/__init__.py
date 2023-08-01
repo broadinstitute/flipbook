@@ -336,12 +336,18 @@ def main():
     app = Flask(__name__)
 
     if args.generate_static_website:
+        os.chdir(args.directory)
         os.makedirs(WEBSITE_DIR, exist_ok=True)
 
         with open(os.path.join(WEBSITE_DIR, "index.html"), "wt") as f:
             f.write(main_list_handler(is_static_website=True).get_data(as_text=True))
         with open(os.path.join(WEBSITE_DIR, "favicon.png"), "wb") as f:
-            f.write(pkgutil.get_data('flipbook', 'icons/favicon.png'))
+            f.write(pkgutil.get_data('flipbook', 'static/images/favicon.png'))
+
+        flipbook_package_dir = sys.modules['flipbook'].__path__[0]
+        static_dir = os.path.join(flipbook_package_dir, "static")
+        print("Copying", static_dir)
+        shutil.copytree(static_dir, os.path.join(WEBSITE_DIR, "static"))
 
         last_page_number = len(RELATIVE_DIRECTORY_TO_DATA_FILES_LIST)
         for i, (relative_directory, data_file_types_and_paths) in enumerate(RELATIVE_DIRECTORY_TO_DATA_FILES_LIST):
@@ -358,7 +364,7 @@ def main():
                 with open(os.path.join(WEBSITE_DIR, get_static_data_page_url(page_number, last_page_number)), "wt") as f:
                     f.write(data_page_handler(is_static_website=True).get_data(as_text=True))
         print("Done")
-        print(f"Generated static website in the ./{WEBSITE_DIR} directory")
+        print(f"Generated static website in the {os.path.realpath(WEBSITE_DIR)} directory")
         sys.exit(0)
 
     # start web server
@@ -371,14 +377,18 @@ def main():
     app.add_url_rule('/save', view_func=save_form_handler, methods=['POST'])
     app.add_url_rule('/<path:path>', view_func=send_file, methods=['GET'])
 
-    os.environ["WERKZEUG_RUN_MAIN"] = "true"
-
     host = os.environ.get('HOST', args.host)
     port = int(os.environ.get('PORT', args.port))
     if args.verbose:
         print(f"Connecting to {host}:{port}")
 
+    #if args.production_server:
+    #    from whitenoise import WhiteNoise
+    #    app.wsgi_app = WhiteNoise(app.wsgi_app, root="static/")
+    #    waitress.serve(app, host=host, port=port)
+    #else:
     try:
+        os.environ["WERKZEUG_RUN_MAIN"] = "true"
         app.run(
             debug=args.dev_mode,
             host=host,
