@@ -2,6 +2,8 @@ import os
 import sys
 from setuptools import setup
 
+# NOTE: This package must be installed with pip, and not with python3 setup.py install
+# in order for static files to work on the webpage
 command = sys.argv[-1]
 if command == 'publish':
     os.system('rm -rf dist')
@@ -14,22 +16,26 @@ with open("README.md", "rt") as fh:
     long_description = fh.read()
 
 install_requires = [
-    "configargparse",
-    "flask",
-    "flask-cors",
-    "gunicorn",
-    "jinja2",
-    "openpyxl",
-    "pandas",
-    "requests",
-    "wcmatch",
-    "xlrd",
-    "xlwt",
+    "configargparse>=1.5.5",
+    "flask-cors>=4.0.0",
+    "gunicorn>=21.2.0",
+    "jinja2>=3.1.2",
+    "openpyxl>=3.1.1",
+    "pandas>=2.0.3",
+    "requests>=2.31.0",
+    "wcmatch>=8.4.1",
+    "xlrd>=2.0.1",
+    "xlwt>=1.3.0",
+
+    # NOTE: there is a "KeyError: 'WERKZEUG_SERVER_FD'" in the latest versions of Werkzeug
+    # when starting the server, so use a previous version of flask and Werkzeug
+    "flask==2.1",
+    "Werkzeug==2.0.0",
 ]
 
 setup(
     name='flipbook',
-    version="0.11.5",
+    version="0.12",
     description="Starts a simple image server that lets you quickly flip through image files from a local directory "
                 "using your web browser and optionally answering customizable questions about each one",
     install_requires=install_requires,
@@ -48,7 +54,8 @@ setup(
         'static/*/*/*.*',
         'static/*/*/*/*.*',
         'static/*/*/*/*/*.*',
-        'static/*/*/*/*/*/*.*'
+        'static/*/*/*/*/*/*.*',
+        'templates/*.*',
     ]},
     python_requires=">=3.7",
     license="MIT",
