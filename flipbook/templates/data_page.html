@@ -98,6 +98,7 @@
                     <div class="ui divider"></div>
                     {% for key, value in metadata_json_dict.items() %}
                         <div style="margin-left: 10px; display: inline-block"><b>{{ key }}</b>: {{ value }}</div>
+                        {% if show_one_key_per_line %} <br /> {% endif %}
                     {% endfor %}
                 {% endif %}
                 {% if form_schema %}

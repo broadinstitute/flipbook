@@ -54,7 +54,7 @@ p.add_argument("--hide-metadata-on-home-page", action="store_true", help="Don't 
                "home page table")
 p.add_argument("--add-metadata-to-form-responses-table", action="store_true", help="Also write metadata columns to the "
                "form responses table when saving users' form responses")
-
+p.add_argument("-l", "--show-one-key-per-line", action="store_true", help="At the top of the data pages, show one key per line.")
 p.add_argument("--generate-static-website", action="store_true", help="Instead of starting a web server, this option "
                "causes FlipBook to write out a set of static html pages for all the images it finds and then exit. "
                "The generated pages can then be viewed in a browser, uploaded to some other web server (such as "
