@@ -126,6 +126,7 @@ def data_page_handler(is_static_website=False):
         form_responses=FORM_RESPONSES.get(relative_dir, {}),
         is_static_website=is_static_website,
         show_one_key_per_line=args.show_one_key_per_line,
+        zoom=args.zoom,
     )
 
     return Response(html, mimetype='text/html')

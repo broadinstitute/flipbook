@@ -62,6 +62,8 @@ p.add_argument("--generate-static-website", action="store_true", help="Instead o
                "the standard FlipBook user interface except they don't contain the forms for entering responses about "
                "each image - and so just allow flipping through the images.")
 
+p.add_argument("-z", "--zoom", type=float, help="Optional zoom factor for images. This can be > or < 1.0")
+
 #p.add_argument("-c", "--config-file", help="Path of yaml config file", env_var="FLIPBOOK_CONFIG_FILE")
 p.add_argument("-v", "--verbose", action='count', default=0, help="Print more info")
 p.add_argument("--host", default="127.0.0.1", env_var="HOST", help="Listen for connections on this hostname or IP")
