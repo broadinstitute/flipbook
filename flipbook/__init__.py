@@ -295,11 +295,11 @@ if args.sort_by:
                 continue
             form_value = FORM_RESPONSES.get(relative_dir, {}).get(s)
             if form_value is not None:
-                sort_key.append(str(form_value))
+                sort_key.append(form_value)
                 continue
             metadata_value = RELATIVE_DIRECTORY_TO_METADATA.get(relative_dir, {}).get(s)
             if metadata_value is not None:
-                sort_key.append(str(metadata_value))
+                sort_key.append(metadata_value)
                 continue
         return tuple(sort_key)
 
