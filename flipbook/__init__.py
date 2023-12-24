@@ -239,7 +239,7 @@ for i, form_schema_row in enumerate(FORM_SCHEMA):
 FORM_RESPONSES = {}
 
 # if a form_responses_table is provided with additional columns which are not in the current FORM_SCHEMA (eg. if the
-# form schema changes, save this info here so it's not lost when the table is updated after new form responses.
+# form schema changes), save this info here so it's not lost when the table is updated after new form responses.
 EXTRA_COLUMNS_IN_FORM_RESPONSES_TABLE = []
 EXTRA_DATA_IN_FORM_RESPONSES_TABLE = {}
 

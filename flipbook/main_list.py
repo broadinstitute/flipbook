@@ -26,7 +26,7 @@ def main_list_handler(is_static_website=False):
     metadata_columns = []
     metadata_dict = {}
     if not args.hide_metadata_on_home_page:
-        metadata_columns = METADATA_COLUMNS
+        metadata_columns = list(METADATA_COLUMNS)  # make a copy
         if not is_static_website:
             metadata_columns += EXTRA_COLUMNS_IN_FORM_RESPONSES_TABLE
         for relative_dir in list(RELATIVE_DIRECTORY_TO_METADATA.keys()) + list(EXTRA_DATA_IN_FORM_RESPONSES_TABLE.keys()):
