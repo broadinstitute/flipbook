@@ -2,9 +2,10 @@ import argparse
 import collections
 import pandas as pd
 
-EXPECTED_COLUMNS = {"Path", "Verdict", "Confidence"}
-HIGH_CONFIDENCE = "high"
+PATH_COLUMN = "Path"
 
+DEFAULT_SCHEMA_COLUMNS = {"Verdict", "Confidence"}
+HIGH_CONFIDENCE = "high"
 DISCORDANT_VERDICT_COLUMN = "Discordant Verdict"
 DISCORDANT_SCORE_COLUMN = "Discordance Score"
 DISCORDANT_TEXT_COLUMN = "Discordance Text"
@@ -36,11 +37,11 @@ def parse_args():
     except Exception as e:
         p.error(f"Error parsing {args.table2}: {e}")
 
-    if EXPECTED_COLUMNS - set(df1.columns):
-        p.error(f"{args.table1} is missing columns: " + ", ".join(EXPECTED_COLUMNS - set(df1.columns)))
+    if PATH_COLUMN not in df1.columns:
+        p.error(f"{args.table1} is missing a '{PATH_COLUMN}' column")
 
-    if EXPECTED_COLUMNS - set(df2.columns):
-        p.error(f"{args.table2} is missing columns: " + ", ".join(EXPECTED_COLUMNS - set(df2.columns)))
+    if PATH_COLUMN not in df2.columns:
+        p.error(f"{args.table2} is missing a '{PATH_COLUMN}' column")
 
     if len(df1) == 0:
         p.error(f"{args.table1} is empty")
@@ -48,21 +49,21 @@ def parse_args():
     if len(df2) == 0:
         p.error(f"{args.table2} is empty")
 
-    df1 = df1.set_index("Path").fillna("")
-    df2 = df2.set_index("Path").fillna("")
+    df1 = df1.set_index(PATH_COLUMN).fillna("")
+    df2 = df2.set_index(PATH_COLUMN).fillna("")
 
     if len(set(df1.index) & set(df2.index)) == 0:
-        p.error(f"{args.table1} Path column values have 0 overlap with {args.table2} Path column values. Tables can only "
-                f"be combined if they have the same Paths.")
+        p.error(f"{args.table1} {PATH_COLUMN} column values have 0 overlap with {args.table2} {PATH_COLUMN} column "
+                f"values. Tables can only be combined if they have the same Paths.")
 
     return args, df1, df2
 
 
-def compute_discordance_columns_func(suffix1, suffix2):
-    verdict_column1 = f"Verdict_{suffix1}"
-    verdict_column2 = f"Verdict_{suffix2}"
-    confidence_column1 = f"Confidence_{suffix1}"
-    confidence_column2 = f"Confidence_{suffix2}"
+def compute_default_schema_discordance_columns_func(suffix1, suffix2):
+    verdict_column1 = f"Verdict {suffix1}"
+    verdict_column2 = f"Verdict {suffix2}"
+    confidence_column1 = f"Confidence {suffix1}"
+    confidence_column2 = f"Confidence {suffix2}"
 
     def compute_discordance_columns(row):
         if not row[verdict_column1] or not row[verdict_column2]:
@@ -104,17 +105,31 @@ def compute_discordance_columns_func(suffix1, suffix2):
     return compute_discordance_columns
 
 
-def main():
-    args, df1, df2 = parse_args()
-    df_joined = df1.join(df2, lsuffix=f"_{args.suffix1}", rsuffix=f"_{args.suffix2}", how="outer").reset_index()
-    df_joined = df_joined.fillna("")
+def compute_generic_schema_discordance_columns_func(columns_to_compare, suffix1, suffix2):
 
+    def compute_discordance_columns(row):
+        for column in columns_to_compare:
+            column1 = f"{column} {suffix1}"
+            column2 = f"{column} {suffix2}"
+            if row[column1] == row[column2]:
+                row[f"{column} diff"] = ""
+                row[f"{column} diff score"] = 0
+            else:
+                row[f"{column} diff"] = f"{row[column1]} ({suffix1}), {row[column2]} ({suffix2})"
+                row[f"{column} diff score"] = 1
+
+        return row
+
+    return compute_discordance_columns
+
+def get_counts_string(df, column, label="", sep=", ", prefix=""):
+    label = f"{label} " if label else ""
+    return sep.join(
+        [f"{prefix}{count} {label}{key}" for key, count in sorted(collections.Counter(df[column].fillna("<empty>")).items())])
+
+
+def compare_tables_with_default_schema(args, df1, df2):
     #  print stats about input tables
-    def get_counts_string(df, column, label="", sep=", "):
-        return sep.join(
-            [f"{count:2d} {label} {key}" for key, count in sorted(collections.Counter(df[column].fillna("<empty>")).items())])
-
-    print("-"*20)
     df1_verdicts_counter = get_counts_string(df1, "Verdict")
     df1_num_verdicts = sum(df1['Verdict'].str.len() > 0)
     df1_num_high_confidence = collections.Counter(df1['Confidence']).get(HIGH_CONFIDENCE, 0)
@@ -125,11 +140,14 @@ def main():
     df2_num_high_confidence = collections.Counter(df2['Confidence']).get(HIGH_CONFIDENCE, 0)
     df2_high_confidence_fraction = df2_num_high_confidence / df2_num_verdicts
 
-    print(f"{args.table2}:  {df1_num_verdicts} verdicts. {df1_verdicts_counter}. High confidence for {100*df1_high_confidence_fraction:4.1f}% of them")
-    print(f"{args.table1}:  {df2_num_verdicts} verdicts. {df2_verdicts_counter}. High confidence for {100*df2_high_confidence_fraction:4.1f}% of them")
+    print(f"{args.table1}:  {df1_num_verdicts} verdicts. {df1_verdicts_counter}. High confidence for {100*df1_high_confidence_fraction:4.1f}% of them")
+    print(f"{args.table2}:  {df2_num_verdicts} verdicts. {df2_verdicts_counter}. High confidence for {100*df2_high_confidence_fraction:4.1f}% of them")
 
     #  compute concordance
-    df_joined = df_joined.apply(compute_discordance_columns_func(args.suffix1, args.suffix2), axis=1)
+    df_joined = df1.join(df2, lsuffix=f" {args.suffix1}", rsuffix=f" {args.suffix2}", how="outer").reset_index()
+    df_joined = df_joined.fillna("")
+
+    df_joined = df_joined.apply(compute_default_schema_discordance_columns_func(args.suffix1, args.suffix2), axis=1)
 
     # print concordance stats
     print("-"*20)
@@ -139,13 +157,63 @@ def main():
     print(f"\nDiscordance score = {sum(df_joined[DISCORDANT_SCORE_COLUMN])}:")
     print(get_counts_string(df_joined, DISCORDANT_TEXT_COLUMN, label="review comparisons:", sep="\n"))
 
-    # write outtable
     print("-"*20)
-    verdict_column1 = f"Verdict_{args.suffix1}"
-    confidence_column1 = f"Confidence_{args.suffix1}"
+    verdict_column1 = f"Verdict {args.suffix1}"
+    confidence_column1 = f"Confidence {args.suffix1}"
     df_joined.sort_values(
         [DISCORDANT_SCORE_COLUMN, DISCORDANT_TEXT_COLUMN, verdict_column1, confidence_column1],
         ascending=False, inplace=True)
+
+    return df_joined
+
+
+def compare_tables_with_generic_schema(args, df1, df2):
+    #  print stats about input tables
+    for column in set(df1.columns) & set(df2.columns):
+        df1_counter = get_counts_string(df1, column)
+        df1_num_responses = sum(df1[column].str.len() > 0)
+
+        df2_counter = get_counts_string(df2, column)
+        df2_num_responses = sum(df2[column].str.len() > 0)
+
+        filename_len = max(len(args.table1), len(args.table2))
+        print(f"{args.table1:{filename_len}s} \"{column.strip(':')}\" column had {df1_num_responses} responses:  {df1_counter}")
+        print(f"{args.table2:{filename_len}s} \"{column.strip(':')}\" column had {df2_num_responses} responses:  {df2_counter}")
+
+    #  compute concordance
+    df_joined = df1.join(df2, lsuffix=f" {args.suffix1}", rsuffix=f" {args.suffix2}", how="outer").reset_index()
+    df_joined = df_joined.fillna("")
+
+    columns_to_compare = [c for c in df1.columns if c != PATH_COLUMN and c in df2.columns]
+    df_joined = df_joined.apply(compute_generic_schema_discordance_columns_func(
+        columns_to_compare, args.suffix1, args.suffix2), axis=1)
+
+    # print concordance stats
+    for column in columns_to_compare:
+        diff_column = f"{column} diff"
+        diff_score_column = f"{column} diff score"
+        num_concordant_responses = sum(df_joined[diff_score_column] == 0)
+        num_discordant_responses = sum(df_joined[diff_score_column] > 0)
+        print(f"{num_concordant_responses} out of {len(df_joined)} ({100*num_concordant_responses/len(df_joined):0.1f}%) "
+              f"\"{column.strip(':')}\" responses agreed between the two tables:")
+        print(get_counts_string(df_joined[df_joined[diff_score_column] == 0], f"{column} {args.suffix1}", sep="\n", prefix="    "))
+        print(" ")
+        print(f"{num_discordant_responses} out of {len(df_joined)} ({100*num_discordant_responses/len(df_joined):0.1f}%) "
+              f"\"{column.strip(':')}\" responses differed between the two tables:")
+        print(get_counts_string(df_joined[df_joined[diff_score_column] > 0], diff_column, sep="\n", prefix="    "))
+
+    return df_joined
+
+def main():
+    args, df1, df2 = parse_args()
+
+    print("-"*20)
+    if DEFAULT_SCHEMA_COLUMNS.issubset(df1.columns) and DEFAULT_SCHEMA_COLUMNS.issubset(df2.columns):
+        df_joined = compare_tables_with_default_schema(args, df1, df2)
+    else:
+        df_joined = compare_tables_with_generic_schema(args, df1, df2)
+
+    # write outtable
     if args.output_table.endswith(".xls") or args.output_table.endswith(".xlsx"):
         df_joined.to_excel(args.output_table, header=True, index=False)
     else:
