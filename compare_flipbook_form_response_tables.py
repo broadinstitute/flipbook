@@ -140,8 +140,9 @@ def compare_tables_with_default_schema(args, df1, df2):
     df2_num_high_confidence = collections.Counter(df2['Confidence']).get(HIGH_CONFIDENCE, 0)
     df2_high_confidence_fraction = df2_num_high_confidence / df2_num_verdicts
 
-    print(f"{args.table1}:  {df1_num_verdicts} verdicts. {df1_verdicts_counter}. High confidence for {100*df1_high_confidence_fraction:4.1f}% of them")
-    print(f"{args.table2}:  {df2_num_verdicts} verdicts. {df2_verdicts_counter}. High confidence for {100*df2_high_confidence_fraction:4.1f}% of them")
+    filename_len = max(len(args.table1), len(args.table2))
+    print(f"{args.table1:{filename_len}s}:  {df1_num_verdicts} verdicts. {df1_verdicts_counter}. High confidence for {100*df1_high_confidence_fraction:4.1f}% of them")
+    print(f"{args.table2:{filename_len}s}:  {df2_num_verdicts} verdicts. {df2_verdicts_counter}. High confidence for {100*df2_high_confidence_fraction:4.1f}% of them")
 
     #  compute concordance
     df_joined = df1.join(df2, lsuffix=f" {args.suffix1}", rsuffix=f" {args.suffix2}", how="outer").reset_index()
