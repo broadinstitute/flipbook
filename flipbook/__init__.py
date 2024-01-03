@@ -55,6 +55,7 @@ p.add_argument("--hide-metadata-on-home-page", action="store_true", help="Don't 
 p.add_argument("--add-metadata-to-form-responses-table", action="store_true", help="Also write metadata columns to the "
                "form responses table when saving users' form responses")
 p.add_argument("-l", "--show-one-key-per-line", action="store_true", help="At the top of the data pages, show one key per line.")
+p.add_argument("-b", "--open-browser", action="store_true", help="Open a web browser after starting the server")
 p.add_argument("--generate-static-website", action="store_true", help="Instead of starting a web server, this option "
                "causes FlipBook to write out a set of static html pages for all the images it finds and then exit. "
                "The generated pages can then be viewed in a browser, uploaded to some other web server (such as "
@@ -389,6 +390,15 @@ def main():
     #    app.wsgi_app = WhiteNoise(app.wsgi_app, root="static/")
     #    waitress.serve(app, host=host, port=port)
     #else:
+
+    # use timer to open a web browser after the server starts
+    if args.open_browser:
+        import webbrowser
+        from threading import Timer
+        if args.verbose:
+            print("Opening browser")
+        Timer(0.2, lambda: webbrowser.open(f"http://{host}:{port}")).start()
+
     try:
         os.environ["WERKZEUG_RUN_MAIN"] = "true"
         app.run(
