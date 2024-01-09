@@ -1,6 +1,8 @@
 import argparse
 import collections
+import json
 import pandas as pd
+import sys
 
 PATH_COLUMN = "Path"
 
@@ -14,6 +16,7 @@ DISCORDANT_TEXT_COLUMN = "Discordance Text"
 def parse_args():
     p = argparse.ArgumentParser(description="Check concordance between two form response tables created by 2 users "
         "reviewing the same images. Rows in the two tables are matched by their same Path column.")
+    p.add_argument("-j", "--form-schema-json", help="Optionally provide the flipbook schema JSON used to generate the 2 tables")
     p.add_argument("-s1", "--suffix1", help="Suffix to append to column names from table1", default="1")
     p.add_argument("-s2", "--suffix2", help="Suffix to append to column names from table2", default="2")
     p.add_argument("-o", "--output-table", help="Path of output .tsv or .xls", default="combined.tsv")
@@ -36,6 +39,14 @@ def parse_args():
             df2 = pd.read_table(args.table2)
     except Exception as e:
         p.error(f"Error parsing {args.table2}: {e}")
+
+    if args.form_schema_json:
+        try:
+            with open(args.form_schema_json, "rt") as f:
+                args.form_schema_json = json.load(f)
+
+        except Exception as e:
+            p.error(f"Error parsing {args.form_schema_json}: {e}")
 
     if PATH_COLUMN not in df1.columns:
         p.error(f"{args.table1} is missing a '{PATH_COLUMN}' column")
@@ -153,7 +164,8 @@ def compare_tables_with_default_schema(args, df1, df2):
     # print concordance stats
     print("-"*20)
     num_discordant_verdicts = sum(df_joined[DISCORDANT_VERDICT_COLUMN])
-    print(f"{num_discordant_verdicts} out of {len(df_joined)} ({100*num_discordant_verdicts/len(df_joined):0.1f}%) of "
+    if num_discordant_verdicts:
+        print(f"{num_discordant_verdicts} out of {len(df_joined)} ({100*num_discordant_verdicts/len(df_joined):0.1f}%) of "
           f"verdicts differed between the two tables")
     print(f"\nDiscordance score = {sum(df_joined[DISCORDANT_SCORE_COLUMN])}:")
     print(get_counts_string(df_joined, DISCORDANT_TEXT_COLUMN, label="review comparisons:", sep="\n"))
@@ -169,13 +181,28 @@ def compare_tables_with_default_schema(args, df1, df2):
 
 
 def compare_tables_with_generic_schema(args, df1, df2):
+
+    columns_shared_by_table1_and_table2 = set(df1.columns) & set(df2.columns) - {PATH_COLUMN}
+    columns_in_schema = set([r["columnName"] for r in args.form_schema_json if r.get("columnName")]) or None
+
+    columns_to_compare = columns_shared_by_table1_and_table2
+    if columns_in_schema:
+        columns_to_compare &= columns_in_schema
+
+    if len(columns_to_compare) == 0:
+        print(f"ERROR: no columns to compare between {args.table1} and {args.table2}")
+        print(f"       Shared columns between the 2 tables were: ", columns_shared_by_table1_and_table2)
+        if columns_in_schema:
+            print("       Columns in schema: ", columns_in_schema)
+        sys.exit(1)
+
     #  print stats about input tables
-    for column in set(df1.columns) & set(df2.columns):
+    for column in columns_to_compare:
         df1_counter = get_counts_string(df1, column)
-        df1_num_responses = sum(df1[column].str.len() > 0)
+        df1_num_responses = sum(df1[column].astype(str).str.len() > 0)
 
         df2_counter = get_counts_string(df2, column)
-        df2_num_responses = sum(df2[column].str.len() > 0)
+        df2_num_responses = sum(df2[column].astype(str).str.len() > 0)
 
         filename_len = max(len(args.table1), len(args.table2))
         print(f"{args.table1:{filename_len}s} \"{column.strip(':')}\" column had {df1_num_responses} responses:  {df1_counter}")
@@ -185,7 +212,6 @@ def compare_tables_with_generic_schema(args, df1, df2):
     df_joined = df1.join(df2, lsuffix=f" {args.suffix1}", rsuffix=f" {args.suffix2}", how="outer").reset_index()
     df_joined = df_joined.fillna("")
 
-    columns_to_compare = [c for c in df1.columns if c != PATH_COLUMN and c in df2.columns]
     df_joined = df_joined.apply(compute_generic_schema_discordance_columns_func(
         columns_to_compare, args.suffix1, args.suffix2), axis=1)
 
@@ -199,8 +225,9 @@ def compare_tables_with_generic_schema(args, df1, df2):
               f"\"{column.strip(':')}\" responses agreed between the two tables:")
         print(get_counts_string(df_joined[df_joined[diff_score_column] == 0], f"{column} {args.suffix1}", sep="\n", prefix="    "))
         print(" ")
-        print(f"{num_discordant_responses} out of {len(df_joined)} ({100*num_discordant_responses/len(df_joined):0.1f}%) "
-              f"\"{column.strip(':')}\" responses differed between the two tables:")
+        if num_discordant_responses:
+            print(f"{num_discordant_responses} out of {len(df_joined)} ({100*num_discordant_responses/len(df_joined):0.1f}%) "
+                  f"\"{column.strip(':')}\" responses differed between the two tables:")
         print(get_counts_string(df_joined[df_joined[diff_score_column] > 0], diff_column, sep="\n", prefix="    "))
 
     return df_joined
