@@ -336,6 +336,11 @@
           return false
         }
       })
+
+      // optionally scroll to image
+      {% if scroll_to_image %}
+        $('html,body').animate({scrollTop: $("a[name='section1']").offset().top},"fast");
+      {% endif %}
     </script>
 </body>
 </html>

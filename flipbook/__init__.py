@@ -64,6 +64,7 @@ p.add_argument("--generate-static-website", action="store_true", help="Instead o
                "each image - and so just allow flipping through the images.")
 
 p.add_argument("-z", "--zoom", type=float, help="Optional zoom factor for images. This can be > or < 1.0")
+p.add_argument("--scroll-to-image", action="store_true", help="Automatically scroll to the image after opening the data page.")
 
 #p.add_argument("-c", "--config-file", help="Path of yaml config file", env_var="FLIPBOOK_CONFIG_FILE")
 p.add_argument("-v", "--verbose", action='count', default=0, help="Print more info")

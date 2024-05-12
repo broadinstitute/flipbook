@@ -127,6 +127,7 @@ def data_page_handler(is_static_website=False):
         is_static_website=is_static_website,
         show_one_key_per_line=args.show_one_key_per_line,
         zoom=args.zoom,
+        scroll_to_image=args.scroll_to_image,
     )
 
     return Response(html, mimetype='text/html')
