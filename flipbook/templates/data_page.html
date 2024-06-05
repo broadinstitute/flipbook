@@ -108,10 +108,13 @@
                         <div class="inline fields ui grid" style="white-space: nowrap">
                             {% set is_first_iter = namespace(value=True) %}
                             {% for form_schema_row in form_schema %}
-                                {% if form_schema_row["type"] == "radio" %}
+                                {% if form_schema_row.get('inputLabel', False) %}
                                     <label for="{{ form_schema_row['name'] }}" style="margin: 5px 0px 5px {{ 10 if is_first_iter.value else 35 }}px">
                                         {{ form_schema_row['inputLabel'] }}
                                     </label>
+                                {% endif %}
+
+                                {% if form_schema_row["type"] == "radio" %}
                                     {% for choice in form_schema_row['choices'] %}
                                         <div class="field">
                                             <div class="ui radio checkbox">
@@ -142,6 +145,11 @@
                                     {% set tabindex.value = tabindex.value + 1 %}
                                 {% endif %}
                                 {% set is_first_iter.value = False %}
+                                {% if form_schema_row.get('newLine', False) %}
+                                    {% for _ in range(form_schema_row['newLine']) %}
+                                        </div><div class="inline fields ui grid" style="white-space: nowrap">
+                                    {% endfor %}
+                                {% endif %}
                             {% endfor %}
 
                             <div id="save-button" class="ui secondary basic button" style="margin: 5px 0px 5px 15px">Save</div>

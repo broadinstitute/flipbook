@@ -209,13 +209,16 @@ FORM_SCHEMA_COLUMNS = [r['columnName'] for r in FORM_SCHEMA]
 FORM_RADIO_BUTTON_KEYBOARD_SHORTCUTS = {}
 for i, form_schema_row in enumerate(FORM_SCHEMA):
     if not isinstance(form_schema_row, dict):
-        raise ValueError(f"FORM_SCHEMA row {i} must be a dictionary")
+        raise ValueError(f"FORM_SCHEMA row #{i+1} must be a dictionary")
 
     missing_keys = {'type', 'columnName'} - set(form_schema_row.keys())
+    unknown_keys = set(form_schema_row.keys()) - {'type', 'columnName', 'name', 'inputLabel', 'choices', 'size', 'newLine'}
+    if unknown_keys:
+        print(f"WARNING: FORM_SCHEMA row #{i+1} includes unexpected key(s): {', '.join(unknown_keys)}")
     if missing_keys:
-        raise ValueError(f"FORM_SCHEMA row {i} is missing values for these keys: {', '.join(missing_keys)}")
+        raise ValueError(f"FORM_SCHEMA row #{i+1} is missing values for these keys: {', '.join(missing_keys)}")
     if form_schema_row['type'] not in ('text', 'radio'):
-        raise ValueError(f"FORM_SCHEMA row {i} has unexpected 'type' value: {form_schema_row['type']}")
+        raise ValueError(f"FORM_SCHEMA row #{i+1} has unexpected 'type' value: {form_schema_row['type']}")
     if 'name' not in form_schema_row:
         form_schema_row['name'] = form_schema_row['columnName'].lower()
     form_schema_row['name'] = re.sub("[^a-zA-Z0-9_]", "_", form_schema_row['name'])
@@ -224,18 +227,22 @@ for i, form_schema_row in enumerate(FORM_SCHEMA):
 
     if form_schema_row['type'] == 'radio':
         if 'choices' not in form_schema_row or not isinstance(form_schema_row['choices'], list):
-            raise ValueError(f"FORM_SCHEMA row {i} is missing a 'choices' list")
-        for choice in form_schema_row['choices']:
+            raise ValueError(f"FORM_SCHEMA row #{i+1} is missing a 'choices' list")
+        for j, choice in enumerate(form_schema_row['choices']):
             if not isinstance(choice, dict):
-                raise ValueError(f"FORM_SCHEMA row {i} must 'choices' list must contain dictionaries")
+                raise ValueError(f"FORM_SCHEMA row #{i+1} 'choices' list entry #{j+1} must be a dictionary")
             missing_keys = {'value', 'label'} - set(choice.keys())
             if missing_keys:
-                raise ValueError(f"FORM_SCHEMA row {i} 'choices' list has entries where these keys are missing: {', '.join(missing_keys)}")
+                raise ValueError(f"FORM_SCHEMA row #{i+1} 'choices' list entry #{j+1} is missing these keys: {', '.join(missing_keys)}")
 
             label_without_html = re.sub("<[^<]+?>", "", choice['label']).strip()
             first_letter = (label_without_html or choice["value"])[0]
             FORM_RADIO_BUTTON_KEYBOARD_SHORTCUTS[first_letter] = choice['value']
             print(f"Form Keyboard Shortcut: {first_letter} => {choice['label']}")
+
+    if 'newLine' in form_schema_row:
+        if not isinstance(form_schema_row['newLine'], int):
+            raise ValueError(f"FORM_SCHEMA row #{i+1} 'newLine' value must be an integer rather than '{form_schema_row['newLine']}'")
 
 # parse or create FORM_RESPONSES dict for storing user responses
 FORM_RESPONSES = {}

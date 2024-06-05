@@ -20,6 +20,8 @@ the following keys:
 - `inputLabel`: the label to display ahead of this question (defaults to `columnName`). This can be plain text or html.
 - `choices`: required if `type` is `radio`. The value should be a list of dictionaries where each dictionary has a `value` and `label` key that represent a choice available to the user. 
    The `label` will be shown in the form, while the `value` will be recorded in the output TSV file if the user selects this choice. The label can be plain text or html.
+- `size`: if `type` is `text`, the value should be an integer representing the width of the text input box.
+- `newLine`: will add new line(s) after this question. The value should be an integer representing how many new lines to add.
 
 
 ### Examples:
