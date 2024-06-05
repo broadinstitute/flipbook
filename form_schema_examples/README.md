@@ -1,11 +1,11 @@
 This folder contains examples of schema files that can be passed to flipbook using the `--form-schema-json` arg.   
 They modify the form that flipbook displays on the image page.  
 
-To use one of these schemas, you can download the raw json file, edit it as needed, and pass it to flipbook via: 
+To use one of these schemas, you can download the JSON file, edit it as needed, and pass it to flipbook via: 
 ```
 python3 -m flipbook --form-schema-json path/my_schema.json
 ```
-or pass in the url: 
+or directly pass in the url: 
 ```
 python3 -m flipbook --form-schema-json https://github.com/broadinstitute/flipbook/blob/main/form_schema_examples/str_genotypes.json
 ```
@@ -39,7 +39,7 @@ changes the form to:
 
 ![image](https://user-images.githubusercontent.com/6240170/118543032-c3b2a280-b721-11eb-8651-258a378e7bbc.png)
 
-For a list of supported icons (beyond thumbs up, thumbs down), see
+For a list of supported icons (other than thumbs up, thumbs down), see
 https://semantic-ui.com/elements/icon.html
 
 
