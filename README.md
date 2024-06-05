@@ -87,7 +87,7 @@ python3 -m flipbook --generate-static-website
 
 - custom form schema (`--form-schema-json`)  
    
-  If you'd like to use non-default questions in the image page forms, you can specify the path or url of a .json file containing a custom form schema. For examples of the expected format see [main/form_schema_examples](https://github.com/broadinstitute/flipbook/tree/main/form_schema_examples)
+  If you'd like to use non-default questions in the image page forms, you can specify the path or url of a .json file containing a custom form schema. For a description and examples of the expected format see [main/form_schema_examples](https://github.com/broadinstitute/flipbook/tree/main/form_schema_examples).  
   
 - config file (`~/.flipbook_config`)
 

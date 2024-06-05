@@ -1,5 +1,28 @@
-This folder contains example .json schema files which can be passed to flipbook using the `--form-schema-json` arg. 
-These modify the form that flipbook displays on the image page.  
+This folder contains examples of schema files that can be passed to flipbook using the `--form-schema-json` arg.   
+They modify the form that flipbook displays on the image page.  
+
+To use one of these schemas, you can download the raw json file, edit it as needed, and pass it to flipbook via: 
+```
+python3 -m flipbook --form-schema-json path/my_schema.json
+```
+or pass in the url: 
+```
+python3 -m flipbook --form-schema-json https://github.com/broadinstitute/flipbook/blob/main/form_schema_examples/str_genotypes.json
+```
+
+### Schema format:
+
+The schema JSON file should contain a list of dictionaries. Each dictionary represents a question, and can have   
+the following keys:
+
+- `type` *(required)*: the value can be `radio` (for multiple-choice input) or `text` (for text input)
+- `columnName` *(required)*: the column name in the output TSV file. Responses to this question will be recorded under this column.  
+- `inputLabel`: the label to display ahead of this question (defaults to `columnName`). This can be plain text or html.
+- `choices`: required if `type` is `radio`. The value should be a list of dictionaries where each dictionary has a `value` and `label` key that represent a choice available to the user. 
+   The `label` will be shown in the form, while the `value` will be recorded in the output TSV file if the user selects this choice. The label can be plain text or html.
+
+
+### Examples:
 
 For example, [str_genotypes.json](https://github.com/broadinstitute/flipbook/blob/main/form_schema_examples/str_genotypes.json)
 changes the form from the default:
@@ -19,14 +42,7 @@ changes the form to:
 For a list of supported icons (beyond thumbs up, thumbs down), see
 https://semantic-ui.com/elements/icon.html
 
----
-To use one of these schemas, you can download the raw json file, edit it if necessary, and pass it to flipbook with 
-```
-python3 -m flipbook2 --form-schema-json path/my_schema.json
-```
-or if one of the examples is what you want, then you can just pass in the url with 
-```
-python3 -m flipbook2 --form-schema-json https://github.com/broadinstitute/flipbook/blob/main/form_schema_examples/str_genotypes.json
-```
-----
-If you'd like to put your own custom schema in this repo to make it easier to share with others, you're welcome to submit it via a github issue or pull request.
+
+### Sharing custom schemas:
+
+If you'd like to add your custom schema as an example to this folder, please submit it in a [github issue](https://github.com/broadinstitute/flipbook/issues) or pull request.
