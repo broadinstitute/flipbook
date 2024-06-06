@@ -128,6 +128,7 @@ def data_page_handler(is_static_website=False):
         show_one_key_per_line=args.show_one_key_per_line,
         zoom=args.zoom,
         scroll_to_image=args.scroll_to_image,
+        autosave_form=args.autosave_form,
     )
 
     return Response(html, mimetype='text/html')

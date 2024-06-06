@@ -259,8 +259,10 @@
           $('#save-status').show()
         },
       }
-      //$('form input[type=text]').api(apiSpec)
-      $('.form .ui.radio').api(apiSpec)
+      {% if autosave_form %}
+        $('.form input[type=text]').api(apiSpec)
+        $('.form .ui.radio').api(apiSpec)
+      {% endif %}
       $('.form #save-button').api(apiSpec)
 
       //keyboard shortcuts
@@ -295,9 +297,11 @@
             // $('form input[type=text]').api(Object.assign({}, apiSpec, {on: 'now'}))
             return
         }
-        //else {
-        //    $('form input[type=text]').api(apiSpec)
-        //}
+        else {
+            {% if autosave_form %}
+                $('.form input[type=text]').api(apiSpec)
+            {% endif %}
+        }
 
         if (event.keyCode == 13) {
           // 13 == Enter key

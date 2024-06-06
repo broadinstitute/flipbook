@@ -102,7 +102,7 @@ python3 -m flipbook --generate-static-website
   ```
 
   
-For more details, run:   
+For the full list of command-line options, run:   
 ```
 python3 -m flipbook --help
 ```
