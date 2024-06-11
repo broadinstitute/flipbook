@@ -295,9 +295,8 @@ if args.sort_by:
         p.error(f"{invalid_values} column(s) not found in metadata. --sort-by value should be one of: " +
                 ", ".join(valid_columns))
 
-    print(f"Sorting {len(RELATIVE_DIRECTORY_TO_DATA_FILES_LIST)} pages by {', '.join(args.sort_by)}")
-    def get_sort_key(i):
-        relative_dir = i[0]
+    def get_sort_key(entry):
+        relative_dir = entry[0]
         sort_key = []
         for s in args.sort_by:
             if s == PATH_COLUMN:
@@ -313,6 +312,23 @@ if args.sort_by:
                 continue
         return tuple(sort_key)
 
+    sort_key_data_types = []
+    for entry in RELATIVE_DIRECTORY_TO_DATA_FILES_LIST:
+        current_sort_key_data_types = tuple([type(v).__name__ for v in get_sort_key(entry)])
+        if not sort_key_data_types:
+            sort_key_data_types = current_sort_key_data_types
+        elif len(sort_key_data_types) == len(current_sort_key_data_types) and sort_key_data_types != current_sort_key_data_types:
+            sort_key_summary1 = [f'{v} ({t})' for v, t in zip(args.sort_by, sort_key_data_types)]
+            sort_key_summary2 = [f'{v} ({t})' for v, t in zip(args.sort_by, current_sort_key_data_types)]
+            p.error(f"Data types of sort columns must be consistent, but they've changed from [{', '.join(sort_key_summary1)}] to [{', '.join(sort_key_summary2)}]")
+        elif len(current_sort_key_data_types) == 0:
+            p.error(f"No sort column value(s) found ({', '.join(args.sort_by)}) for {entry[0]}")
+
+    if len(sort_key_data_types) < len(args.sort_by):
+        p.error(f"Found only {len(sort_key_data_types)} out of {len(args.sort_by)} sort columns")
+
+    sort_key_summary = [f'{v} ({t})' for v, t in zip(args.sort_by, sort_key_data_types)]
+    print(f"Sorting {len(RELATIVE_DIRECTORY_TO_DATA_FILES_LIST)} pages by {', '.join(sort_key_summary)}")
     RELATIVE_DIRECTORY_TO_DATA_FILES_LIST = sorted(RELATIVE_DIRECTORY_TO_DATA_FILES_LIST, key=get_sort_key, reverse=args.reverse_sort)
 
 
