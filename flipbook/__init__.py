@@ -262,7 +262,7 @@ if FORM_SCHEMA:
             df = parse_table(args.form_responses_table)
         except ValueError as e:
             p.error(str(e))
-        EXTRA_COLUMNS_IN_FORM_RESPONSES_TABLE = [c for c in df.columns if c not in FORM_SCHEMA_COLUMNS and c not in METADATA_COLUMNS and c != PATH_COLUMN]
+        EXTRA_COLUMNS_IN_FORM_RESPONSES_TABLE = [c for c in df.columns if c not in FORM_SCHEMA_COLUMNS and c != PATH_COLUMN]
     else:
         # make sure the table can be written out later
         if not os.access(os.path.dirname(args.form_responses_table), os.W_OK):
@@ -271,6 +271,17 @@ if FORM_SCHEMA:
         # create empty table in memory
         df = pd.DataFrame(columns=[PATH_COLUMN] + FORM_SCHEMA_COLUMNS)
         df.set_index(PATH_COLUMN, inplace=True, drop=False)
+
+    # if the form responses table has additional columns that overlap with columns in the metadata table(s), print a
+    # warning and discard them from the form resonses table so that the metadata takes precedence over any outdated
+    # values in the form responses table.
+    if set(EXTRA_COLUMNS_IN_FORM_RESPONSES_TABLE) & set(METADATA_COLUMNS):
+        print("WARNING: these columns are present in the metadata files and also in the form responses table:",
+              ",\n".join(sorted(set(EXTRA_COLUMNS_IN_FORM_RESPONSES_TABLE) & set(METADATA_COLUMNS))),
+              "\nThe metadata values will be used instead of the form responses table for these columns.")
+        df = df[[c for c in df.columns if c not in METADATA_COLUMNS]]
+        EXTRA_COLUMNS_IN_FORM_RESPONSES_TABLE = [
+            c for c in EXTRA_COLUMNS_IN_FORM_RESPONSES_TABLE if c not in METADATA_COLUMNS]
 
     # store form responses in memory.
     # NOTE: This is not thread-safe and assumes a single-threaded server. For multi-threaded
@@ -310,6 +321,7 @@ if args.sort_by:
             if metadata_value is not None:
                 sort_key.append(metadata_value)
                 continue
+
         return tuple(sort_key)
 
     sort_key_data_types = []
@@ -330,6 +342,8 @@ if args.sort_by:
     sort_key_summary = [f'{v} ({t})' for v, t in zip(args.sort_by, sort_key_data_types)]
     print(f"Sorting {len(RELATIVE_DIRECTORY_TO_DATA_FILES_LIST)} pages by {', '.join(sort_key_summary)}")
     RELATIVE_DIRECTORY_TO_DATA_FILES_LIST = sorted(RELATIVE_DIRECTORY_TO_DATA_FILES_LIST, key=get_sort_key, reverse=args.reverse_sort)
+    #for entry in RELATIVE_DIRECTORY_TO_DATA_FILES_LIST:
+    #    print(get_sort_key(entry))
 
 
 def send_file(path):
