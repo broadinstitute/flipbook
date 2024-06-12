@@ -273,12 +273,13 @@ if FORM_SCHEMA:
         df.set_index(PATH_COLUMN, inplace=True, drop=False)
 
     # if the form responses table has additional columns that overlap with columns in the metadata table(s), print a
-    # warning and discard them from the form resonses table so that the metadata takes precedence over any outdated
+    # message and discard them from the form resonses table so that the metadata takes precedence over any outdated
     # values in the form responses table.
     if set(EXTRA_COLUMNS_IN_FORM_RESPONSES_TABLE) & set(METADATA_COLUMNS):
-        print("WARNING: these columns are present in the metadata files and also in the form responses table:",
-              ",\n".join(sorted(set(EXTRA_COLUMNS_IN_FORM_RESPONSES_TABLE) & set(METADATA_COLUMNS))),
-              "\nThe metadata values will be used instead of the form responses table for these columns.")
+        print("NOTE: the following columns are present in both the metadata files and in the form responses table, "
+              "so the values from the metadata will take precedence over the values from the form responses table:\n\t"+
+              ",\n\t".join(sorted(set(EXTRA_COLUMNS_IN_FORM_RESPONSES_TABLE) & set(METADATA_COLUMNS))))
+
         df = df[[c for c in df.columns if c not in METADATA_COLUMNS]]
         EXTRA_COLUMNS_IN_FORM_RESPONSES_TABLE = [
             c for c in EXTRA_COLUMNS_IN_FORM_RESPONSES_TABLE if c not in METADATA_COLUMNS]
