@@ -183,7 +183,9 @@ def compare_tables_with_default_schema(args, df1, df2):
 def compare_tables_with_generic_schema(args, df1, df2):
 
     columns_shared_by_table1_and_table2 = set(df1.columns) & set(df2.columns) - {PATH_COLUMN}
-    columns_in_schema = set([r["columnName"] for r in args.form_schema_json if r.get("columnName")]) or None
+    columns_in_schema = None
+    if args.form_schema_json:
+        columns_in_schema = set([r["columnName"] for r in args.form_schema_json if r.get("columnName")]) or None
 
     columns_to_compare = columns_shared_by_table1_and_table2
     if columns_in_schema:
@@ -191,7 +193,11 @@ def compare_tables_with_generic_schema(args, df1, df2):
 
     if len(columns_to_compare) == 0:
         print(f"ERROR: no columns to compare between {args.table1} and {args.table2}")
-        print(f"       Shared columns between the 2 tables were: ", columns_shared_by_table1_and_table2)
+        if columns_shared_by_table1_and_table2:
+            print(f"       Shared columns between the 2 tables were: ", columns_shared_by_table1_and_table2)
+        else:
+            print(f"       There are no shared columns between the 2 tables")
+
         if columns_in_schema:
             print("       Columns in schema: ", columns_in_schema)
         sys.exit(1)
