@@ -131,3 +131,11 @@ cd flipbook
 # start server in dev mode so it reloads code on change
 python3 -m flipbook /path/dir-with-images --dev-mode
 ```
+
+### Citation:
+
+If you would like to cite FlipBook in your publication, please cite:
+
+```
+Dolzhenko E, Weisburd B, Ibañez K, Rajan-Babu IS, Anyansi C, Bennett MF, Billingsley K, Carroll A, Clamons S, Danzi MC, Deshpande V, Ding J, Fazal S, Halman A, Jadhav B, Qiu Y, Richmond PA, Saunders CT, Scheffler K, van Vugt JJFA, Zwamborn RRAJ; Genomics England Research Consortium; Chong SS, Friedman JM, Tucci A, Rehm HL, Eberle MA. REViewer: haplotype-resolved visualization of read alignments in and around tandem repeats. Genome Med. 2022 Aug 11;14(1):84. doi: 10.1186/s13073-022-01085-z. PMID: 35948990; PMCID: PMC9367089.
+```
