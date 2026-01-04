@@ -73,17 +73,31 @@ p.add_argument("--host", default="127.0.0.1", env_var="HOST", help="Listen for c
 p.add_argument("-p", "--port", default="8080", env_var="PORT", type=int, help="Listen for connections on this port")
 p.add_argument("--dev-mode", action="store_true", env_var="DEV", help="Run server in developer mode so it reloads "
                "html templates and source code if they're changed")
-p.add_argument("directory", default=".", nargs="?", help="Top-level directory to search for images and data files")
+
+p.add_argument("--image-list", help="A text file of local or remote image file paths. If this is provided, the "
+               "directory argument is ignored.")
+p.add_argument("directory", default=".", nargs="?",
+               help="Top-level directory to search for images and data files, or a text file containing the "
+                    "the local paths, HTTP urls or gs:// paths of images.")
 args = p.parse_args()
 
 if args.verbose > 1:
     p.print_values()
 
-if not os.path.isdir(args.directory):
-    p.error(f"{args.directory} directory not found")
+if args.image_list:
+    if not os.path.isfile(args.image_list):
+        p.error(f"{args.image_list} not found")
+
+    with open(args.image_list, "rt") as f:
+        lines = f.readlines()
+
+    image_paths = [l.strip() for l in lines if l.strip()]
+    print(f"Parsed {len(image_paths)} image paths from {args.image_list}")
+else:
+    if not os.path.isdir(args.directory):
+        p.error(f"{args.directory} directory not found")
 
 args.directory = os.path.realpath(args.directory)
-
 
 def parse_table(path):
     if not os.path.isfile(path):
@@ -109,12 +123,23 @@ def parse_table(path):
     return df
 
 
-# search directory for images and data files
-RELATIVE_DIRECTORY_TO_DATA_FILES_LIST = get_relative_directory_to_data_files_list(
-    args.directory,
-    args.include,
-    args.exclude,
-    verbose=args.verbose)
+if args.image_list:
+    # procss image file list
+    RELATIVE_DIRECTORY_TO_DATA_FILES_LIST = get_relative_directory_to_data_files_from_image_list(
+        args.image_list,
+        args.include,
+        args.exclude,
+        verbose=args.verbose)
+else:
+    # search directory for images and data files
+    RELATIVE_DIRECTORY_TO_DATA_FILES_LIST = get_relative_directory_to_data_files_list(
+        args.directory,
+        args.include,
+        args.exclude,
+        verbose=args.verbose)
+
+#from pprint import pprint
+#pprint(RELATIVE_DIRECTORY_TO_DATA_FILES_LIST)
 
 if not RELATIVE_DIRECTORY_TO_DATA_FILES_LIST:
     p.error(f"No images or data files found in {args.directory}")
