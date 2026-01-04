@@ -62,7 +62,7 @@ def data_page_handler(is_static_website=False):
 
     last = params.get("last", i)
     try:
-        if isinstance(i, list):
+        if isinstance(last, list):
             last = int(last[0])
         else:
             last = int(last)

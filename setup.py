@@ -42,13 +42,13 @@ setup(
     entry_points = {
         'console_scripts': [
             'flipbook = flipbook:main',
-            'compare_flipbook_form_response_tables = compare_form_response_tables:main',
+            'compare_flipbook_form_response_tables = compare_flipbook_form_response_tables:main',
         ],
     },
     long_description_content_type="text/markdown",
     long_description=long_description,
     packages=["flipbook"],
-    py_modules=["compare_form_response_tables"],
+    py_modules=["compare_flipbook_form_response_tables"],
     include_package_data=True,
     package_data={'': [
         'static/*/*.*',

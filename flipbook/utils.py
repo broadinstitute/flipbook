@@ -1,4 +1,5 @@
 import collections
+import gzip
 from jinja2 import Template
 import json
 import os
@@ -12,6 +13,42 @@ CONTENT_HTML_FILE_TYPE = "content_html"
 
 METADATA_JSON_FILE_SUFFIX = "flipbook_metadata.json"
 CONTENT_HTML_FILE_SUFFIX = "flipbook_content.html"
+
+
+def get_relative_directory_to_data_files_from_image_list(
+    image_list_path,
+    keywords_to_include,
+    keywords_to_exclude,
+    verbose=False):
+    relative_directory_to_data_files = collections.defaultdict(list)
+    print(f"Reading image list from {image_list_path}")
+    fopen = gzip.open if image_list_path.endswith("gz") else open
+    with fopen(image_list_path, "rt") as f:
+        for line in f:
+            image_file_path = line.strip()
+            if not image_file_path:
+                continue
+
+            # Apply keyword filtering
+            if keywords_to_include:
+                if not all(k in image_file_path for k in keywords_to_include):
+                    if verbose:
+                        print(f"Skipping {image_file_path} - doesn't contain all --include keywords")
+                    continue
+
+            if keywords_to_exclude:
+                if any(k in image_file_path for k in keywords_to_exclude):
+                    if verbose:
+                        print(f"Skipping {image_file_path} - contains excluded keyword")
+                    continue
+
+            key = os.path.dirname(image_file_path)
+            relative_directory_to_data_files[key].append((IMAGE_FILE_TYPE, image_file_path))
+
+    relative_directory_to_data_files_list = list(sorted(relative_directory_to_data_files.items()))
+
+    return relative_directory_to_data_files_list
+
 
 
 def get_relative_directory_to_data_files_list(
