@@ -89,6 +89,13 @@ python3 -m flipbook --generate-static-website
    
   If you'd like to use non-default questions in the image page forms, you can specify the path or url of a .json file containing a custom form schema. For a description and examples of the expected format see [main/form_schema_examples](https://github.com/broadinstitute/flipbook/tree/main/form_schema_examples).  
   
+- image list (`--image-list`)
+
+  Instead of crawling a directory for images, you can provide a text file containing a list of image paths (one per line).
+  This is useful when you want to review a specific subset of images or images from multiple locations.
+  The file can contain local paths, HTTP URLs, or gs:// paths. Gzip-compressed files (`.gz`) are also supported.
+  When using `--image-list`, the directory argument is ignored.
+
 - config file (`~/.flipbook_config`)
 
   Most settings that can be provided on the command line can also be set via this YAML config file instead. For example:
@@ -109,16 +116,16 @@ python3 -m flipbook --help
 
 ### Comparing reviews:
 
-If 2 or more people review the same images, the reviews can be compared using the `compare_form_response_tables` script.  
+If 2 or more people review the same images, the reviews can be compared using the `compare_flipbook_form_response_tables` script.
 
 For example:
 ```
-python3 -m compare_form_response_tables egor_flipbook_form_responses.tsv  ben_flipbook_form_responses.tsv -o combined_responses.tsv -s1 egor -s2 ben
+python3 -m compare_flipbook_form_response_tables egor_flipbook_form_responses.tsv  ben_flipbook_form_responses.tsv -o combined_responses.tsv -s1 egor -s2 ben
 ```
 
-This script will print concordance stats, and output a `combined_responses.tsv` table that contains one image per row as well as each person's review of the image.  
-  
-To see the full list of args and descriptions, run `python3 -m compare_form_response_tables --help`
+This script will print concordance stats, and output a `combined_responses.tsv` table that contains one image per row as well as each person's review of the image.
+
+To see the full list of args and descriptions, run `python3 -m compare_flipbook_form_response_tables --help`
 
 ### Development:
 

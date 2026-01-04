@@ -56,7 +56,7 @@ def save_form_handler():
     df = pd.DataFrame(output_table_rows, columns=output_table_columns).fillna('')
     print(f"Saving {len(df)} rows to {args.form_responses_table}")
     if args.form_responses_table_is_excel:
-        df.to_excel(args.form_responses_table)
+        df.to_excel(args.form_responses_table, index=False)
     else:
         df.to_csv(args.form_responses_table, sep="\t", header=True, index=False)
 
