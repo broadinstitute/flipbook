@@ -1,5 +1,6 @@
 import collections
 import configargparse
+import gzip
 from flask import Flask, Response, send_from_directory
 from flask_cors import CORS
 import jinja2
@@ -380,6 +381,12 @@ def send_file(path):
             mimetype="image/png"
         return Response(pkg_resources.resource_stream('flipbook', path), mimetype=mimetype)
 
+    if path.endswith(".svg.gz"):
+        # serve gzipped SVGs with a Content-Encoding header so the browser decompresses and renders them
+        response = send_from_directory(args.directory, path, mimetype="image/svg+xml")
+        response.headers["Content-Encoding"] = "gzip"
+        return response
+
     return send_from_directory(args.directory, path, as_attachment=True)
 
 
@@ -427,7 +434,13 @@ def main():
                     if data_file_type in (METADATA_JSON_FILE_TYPE, CONTENT_HTML_FILE_TYPE):
                         continue
                     print("Copying", data_file_type, data_file, "to", page_dir)
-                    shutil.copy(data_file, page_dir)
+                    if data_file.endswith(".svg.gz"):
+                        # decompress since static web hosts may not serve .svg.gz files with a gzip Content-Encoding header
+                        with gzip.open(data_file, "rb") as fin:
+                            with open(os.path.join(page_dir, os.path.basename(data_file)[:-len(".gz")]), "wb") as fout:
+                                shutil.copyfileobj(fin, fout)
+                    else:
+                        shutil.copy(data_file, page_dir)
 
                 with open(os.path.join(WEBSITE_DIR, get_static_data_page_url(page_number, last_page_number)), "wt") as f:
                     f.write(data_page_handler(is_static_website=True).get_data(as_text=True))

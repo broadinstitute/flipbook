@@ -11,7 +11,7 @@ It also optionally shows a form where you can take notes or answer questions abo
 ### Features:
 
 - simple way to flip through many local image files using your web browser
-- crawls a top-level directory to find .png, .jpeg, or .svg image files
+- crawls a top-level directory to find .png, .jpeg, .svg, or .svg.gz image files
 - browser interface: home page lists all images
 - browser interface: image pages show the image, an optional customizable form where you can take notes or answer questions about the image, next/previous page links, and optional other customizable info for context
 - use subdirectories to group images. Any images found in the same subdirectory will be shown on the same page  

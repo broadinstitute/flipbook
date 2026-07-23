@@ -89,6 +89,9 @@ def data_page_handler(is_static_website=False):
     image_file_paths = []
     for data_file_type, data_file_path in data_file_types_and_paths:
         if data_file_type == IMAGE_FILE_TYPE:
+            if is_static_website and data_file_path.endswith(".svg.gz"):
+                # static website generation decompresses .svg.gz files to .svg
+                data_file_path = data_file_path[:-len(".gz")]
             image_file_paths.append(data_file_path)
 
     metadata_json_dict = RELATIVE_DIRECTORY_TO_METADATA.get(relative_dir, {})

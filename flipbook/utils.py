@@ -55,7 +55,7 @@ def get_relative_directory_to_data_files_list(
         top_level_dir,
         keywords_to_include,
         keywords_to_exclude,
-        suffixes=("svg", "png", "jpeg", "jpg", "gif", "webp", CONTENT_HTML_FILE_SUFFIX, METADATA_JSON_FILE_SUFFIX),
+        suffixes=("svg", "svg.gz", "png", "jpeg", "jpg", "gif", "webp", CONTENT_HTML_FILE_SUFFIX, METADATA_JSON_FILE_SUFFIX),
         verbose=False):
     data_file_paths = []
 
