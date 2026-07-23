@@ -3,17 +3,19 @@
 <head>
     <meta content="width=device-width, initial-scale=1" charset="utf-8" name="viewport" />
 
-    <link rel="stylesheet" href="/static/css/semantic.min.css" />
-    <link rel="stylesheet" type="text/css" href="/static/css/datatables.min.css"/>
+    {# static websites may be opened via file:// or hosted under a subpath, so use relative asset urls there #}
+    {% set static_prefix = "static" if is_static_website else "/static" %}
+    <link rel="stylesheet" href="{{ static_prefix }}/css/semantic.min.css" />
+    <link rel="stylesheet" type="text/css" href="{{ static_prefix }}/css/datatables.min.css"/>
 
-    <script src="/static/js/jquery.min.js"></script>
-    <script type="text/javascript" src="/static/js/semantic.min.js"></script>
+    <script src="{{ static_prefix }}/js/jquery.min.js"></script>
+    <script type="text/javascript" src="{{ static_prefix }}/js/semantic.min.js"></script>
 
-    <script type="text/javascript" src="/static/js/pdfmake.min.js"></script>
-    <script type="text/javascript" src="/static/js/vfs_fonts.js"></script>
-    <script type="text/javascript" src="/static/js/datatables.min.js"></script>
+    <script type="text/javascript" src="{{ static_prefix }}/js/pdfmake.min.js"></script>
+    <script type="text/javascript" src="{{ static_prefix }}/js/vfs_fonts.js"></script>
+    <script type="text/javascript" src="{{ static_prefix }}/js/datatables.min.js"></script>
 
-    <link rel="icon" href="/static/images/favicon.png" type="image/x-icon"/>
+    <link rel="icon" href="{{ static_prefix }}/images/favicon.png" type="image/x-icon"/>
     <title>FlipBook</title>
     <style>
         .dt-buttons {
@@ -38,7 +40,7 @@
             <div class="one wide column"></div>
             <div class="fourteen wide column">
                 {% if header_html %}
-                    {{ header_html }}
+                    {{ header_html | safe }}
                 {% else %}
                     <div style="font-size: 12pt">
                         {% if form_column_names %}
@@ -76,7 +78,7 @@
                                 {% endif %}
                                 <td style="padding-right: 50px;">
                                     <a id="link{{page_number}}" href="{{ get_data_page_url(page_number, data_files_list | length) }}">
-                                        {{relative_directory or filenames[0]}}
+                                        {{relative_directory or filenames[0][1]}}
                                     </a>
                                 </td>
                                 {% for column_name in form_column_names %}
@@ -86,7 +88,7 @@
                                 {% endfor %}
                                 {% for column_name in metadata_column_names %}
                                     <td>
-                                        {{ metadata_dict.get(relative_directory, {}).get(column_name, '') }}
+                                        {{ metadata_dict.get(relative_directory, {}).get(column_name, '') | safe }}
                                     </td>
                                 {% endfor %}
                             </tr>

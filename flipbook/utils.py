@@ -43,6 +43,9 @@ def get_relative_directory_to_data_files_from_image_list(
                     continue
 
             key = os.path.dirname(image_file_path)
+            if not key or key == ".":
+                # give top-level entries their own key so distinct images don't all merge onto one page
+                key = image_file_path
             relative_directory_to_data_files[key].append((IMAGE_FILE_TYPE, image_file_path))
 
     relative_directory_to_data_files_list = list(sorted(relative_directory_to_data_files.items()))
@@ -186,4 +189,7 @@ def get_data_page_url(page_number, last):
 
 
 def load_jinja_template(name):
-    return Template(pkg_resources.resource_stream("flipbook" , f"templates/{name}.html").read().decode('UTF-8'))
+    # autoescape so that quotes in saved form responses can't break out of html attributes. Variables that
+    # intentionally contain html (headers, content files, form labels, metadata values) are marked |safe.
+    return Template(pkg_resources.resource_stream("flipbook" , f"templates/{name}.html").read().decode('UTF-8'),
+                    autoescape=True)

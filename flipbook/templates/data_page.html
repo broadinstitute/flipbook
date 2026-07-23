@@ -3,19 +3,21 @@
 <head>
     <meta content="width=device-width, initial-scale=1" charset="utf-8" name="viewport" />
 
-    <link rel="stylesheet" href="/static/css/semantic.min.css" />
+    {# static websites may be opened via file:// or hosted under a subpath, so use relative asset urls there #}
+    {% set static_prefix = "static" if is_static_website else "/static" %}
+    <link rel="stylesheet" href="{{ static_prefix }}/css/semantic.min.css" />
 
-    <script src="/static/js/jquery.min.js"></script>
-    <script type="text/javascript" src="/static/js/semantic.min.js"></script>
-    <script src="/static/js/jquery.serialize-object.min.js"></script>
-    <script src="/static/js/purl.min.js"></script>
+    <script src="{{ static_prefix }}/js/jquery.min.js"></script>
+    <script type="text/javascript" src="{{ static_prefix }}/js/semantic.min.js"></script>
+    <script src="{{ static_prefix }}/js/jquery.serialize-object.min.js"></script>
+    <script src="{{ static_prefix }}/js/purl.min.js"></script>
 
-    <link rel="icon" href="/static/images/favicon.png" type="image/x-icon"/>
+    <link rel="icon" href="{{ static_prefix }}/images/favicon.png" type="image/x-icon"/>
     <title>FlipBook: {{ relative_directory }}</title>
     <style>
         .img-default-view {
             cursor: zoom-in;
-            max-width: {{ (zoom or 1) * 100 | int }}% !important;
+            max-width: {{ ((zoom or 1) * 100) | int }}% !important;
         }
         .img-zoomed-in-view {
             cursor: zoom-out;
@@ -47,7 +49,7 @@
             <div class="one wide column"></div>
             <div class="fourteen wide column">
                 {% if header_html %}
-                    {{ header_html }}
+                    {{ header_html | safe }}
                 {% endif %}
 
                 <div class="ui stackable grid">
@@ -97,7 +99,7 @@
                 {% if metadata_json_dict|length > 0 %}
                     <div class="ui divider"></div>
                     {% for key, value in metadata_json_dict.items() %}
-                        <div style="margin-left: 10px; display: inline-block"><b>{{ key }}</b>: {{ value }}</div>
+                        <div style="margin-left: 10px; display: inline-block"><b>{{ key }}</b>: {{ value | safe }}</div>
                         {% if show_one_key_per_line %} <br /> {% endif %}
                     {% endfor %}
                 {% endif %}
@@ -110,7 +112,7 @@
                             {% for form_schema_row in form_schema %}
                                 {% if form_schema_row.get('inputLabel', False) %}
                                     <label for="{{ form_schema_row['name'] }}" style="margin: 5px 0px 5px {{ 10 if is_first_iter.value else 35 }}px">
-                                        {{ form_schema_row['inputLabel'] }}
+                                        {{ form_schema_row['inputLabel'] | safe }}
                                     </label>
                                 {% endif %}
 
@@ -126,7 +128,7 @@
                                                        autofocus
                                                        {{ "checked" if form_responses.get(form_schema_row['columnName']) == choice['value'] else "" }}
                                                 >
-                                                <label>{{ choice['label'] }}</label>
+                                                <label>{{ choice['label'] | safe }}</label>
                                             </div>
                                         </div>
                                         {% set tabindex.value = tabindex.value + 1 %}
@@ -173,9 +175,15 @@
                         {% endif %}
                     </div>
 
-                    {# gs:// paths can't be loaded directly by the browser, so they're proxied through the /gs/ route #}
+                    {# gs:// paths can't be loaded directly by the browser, so they're proxied through the /gs/
+                       route. Local paths from an --image-list can be absolute or outside args.directory, so
+                       they're served through the /il route. #}
                     {% if image_file_path.startswith("gs://") %}
                         {% set image_src = "/gs/" + image_file_path[5:] %}
+                    {% elif image_file_path.startswith("http://") or image_file_path.startswith("https://") %}
+                        {% set image_src = image_file_path %}
+                    {% elif image_list_mode %}
+                        {% set image_src = "/il?p=" + (image_file_path | urlencode) %}
                     {% else %}
                         {% set image_src = image_file_path + "?cache=" + (image_file_path | ctime | string) %}
                     {% endif %}
@@ -196,7 +204,7 @@
                         {% endif %}
                     </div>
                     <div style="margin: 10px">
-                        {{ content_html_string }}
+                        {{ content_html_string | safe }}
                     </div>
                     {% set section_counter.value = section_counter.value + 1 %}
                 {% endfor %}
@@ -208,7 +216,7 @@
       //add path to url to so that saved links or bookmarks can be robust to different sort orders
       {% if not is_static_website %}
           let urlParams = $.url(window.location.href).param()
-          urlParams["path"] = "{{ relative_directory }}"
+          urlParams["path"] = {{ relative_directory | tojson }}
           urlParams["i"] = "{{ i }}"
           urlParams["last"] = "{{ last }}"
           let urlPath = window.location.pathname.split("?")[0]

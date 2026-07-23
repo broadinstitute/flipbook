@@ -7,7 +7,8 @@ import sys
 PATH_COLUMN = "Path"
 
 DEFAULT_SCHEMA_COLUMNS = {"Verdict", "Confidence"}
-HIGH_CONFIDENCE = "high"
+# "high" is used by form_schema_examples/default.json, "confident" by flipbook's built-in schema
+HIGH_CONFIDENCE_VALUES = {"high", "confident"}
 DISCORDANT_VERDICT_COLUMN = "Discordant Verdict"
 DISCORDANT_SCORE_COLUMN = "Discordance Score"
 DISCORDANT_TEXT_COLUMN = "Discordance Text"
@@ -19,14 +20,18 @@ def parse_args():
     p.add_argument("-j", "--form-schema-json", help="Optionally provide the flipbook schema JSON used to generate the 2 tables")
     p.add_argument("-s1", "--suffix1", help="Suffix to append to column names from table1", default="1")
     p.add_argument("-s2", "--suffix2", help="Suffix to append to column names from table2", default="2")
-    p.add_argument("-o", "--output-table", help="Path of output .tsv or .xls", default="combined.tsv")
+    p.add_argument("-o", "--output-table", help="Path of output .tsv or .xlsx", default="combined.tsv")
     p.add_argument("table1", help="Path of form response table .tsv")
     p.add_argument("table2", help="Path of form response table .tsv")
     args = p.parse_args()
 
+    if args.output_table.endswith(".xls"):
+        p.error(f"pandas can no longer write legacy .xls files. Please use a .xlsx or .tsv path for --output-table")
+
     try:
         if args.table1.endswith(".xls") or args.table1.endswith(".xlsx"):
-            df1 = pd.read_excel(args.table1, engine="openpyxl")
+            # openpyxl only reads .xlsx; legacy .xls requires the xlrd engine
+            df1 = pd.read_excel(args.table1, engine="xlrd" if args.table1.endswith(".xls") else "openpyxl")
         else:
             df1 = pd.read_table(args.table1)
     except Exception as e:
@@ -34,7 +39,7 @@ def parse_args():
 
     try:
         if args.table2.endswith(".xls") or args.table2.endswith(".xlsx"):
-            df2 = pd.read_excel(args.table2, engine="openpyxl")
+            df2 = pd.read_excel(args.table2, engine="xlrd" if args.table2.endswith(".xls") else "openpyxl")
         else:
             df2 = pd.read_table(args.table2)
     except Exception as e:
@@ -78,6 +83,10 @@ def compute_default_schema_discordance_columns_func(suffix1, suffix2):
 
     def compute_discordance_columns(row):
         if not row[verdict_column1] or not row[verdict_column2]:
+            # set concrete values so rows missing a verdict don't introduce NaNs into the summed stats
+            row[DISCORDANT_VERDICT_COLUMN] = 0
+            row[DISCORDANT_SCORE_COLUMN] = 0
+            row[DISCORDANT_TEXT_COLUMN] = "missing verdict in one or both tables"
             return row
 
         if row[verdict_column1] == row[verdict_column2]:
@@ -86,10 +95,10 @@ def compute_default_schema_discordance_columns_func(suffix1, suffix2):
             row[DISCORDANT_SCORE_COLUMN] = 0
             row[DISCORDANT_TEXT_COLUMN] = "same verdict"
             if row[confidence_column1] and row[confidence_column2]:
-                if row[confidence_column1] == HIGH_CONFIDENCE and row[confidence_column2] == HIGH_CONFIDENCE:
+                if row[confidence_column1] in HIGH_CONFIDENCE_VALUES and row[confidence_column2] in HIGH_CONFIDENCE_VALUES:
                     row[DISCORDANT_SCORE_COLUMN] = 0
                     row[DISCORDANT_TEXT_COLUMN] = "same verdict, both high confidence"
-                elif row[confidence_column1] == HIGH_CONFIDENCE or row[confidence_column2] == HIGH_CONFIDENCE:
+                elif row[confidence_column1] in HIGH_CONFIDENCE_VALUES or row[confidence_column2] in HIGH_CONFIDENCE_VALUES:
                     row[DISCORDANT_SCORE_COLUMN] = 1
                     row[DISCORDANT_TEXT_COLUMN] = "same verdict, one high confidence"
                 else:
@@ -101,10 +110,10 @@ def compute_default_schema_discordance_columns_func(suffix1, suffix2):
             row[DISCORDANT_SCORE_COLUMN] = 2
             row[DISCORDANT_TEXT_COLUMN] = "different verdict"
             if row[confidence_column1] or row[confidence_column2]:
-                if row[confidence_column1] == HIGH_CONFIDENCE and row[confidence_column2] == HIGH_CONFIDENCE:
+                if row[confidence_column1] in HIGH_CONFIDENCE_VALUES and row[confidence_column2] in HIGH_CONFIDENCE_VALUES:
                     row[DISCORDANT_SCORE_COLUMN] = 4
                     row[DISCORDANT_TEXT_COLUMN] = "different verdict, both high confidence"
-                elif row[confidence_column1] == HIGH_CONFIDENCE or row[confidence_column2] == HIGH_CONFIDENCE:
+                elif row[confidence_column1] in HIGH_CONFIDENCE_VALUES or row[confidence_column2] in HIGH_CONFIDENCE_VALUES:
                     row[DISCORDANT_SCORE_COLUMN] = 3
                     row[DISCORDANT_TEXT_COLUMN] = "different verdict, one high confidence"
                 else:
@@ -143,13 +152,18 @@ def compare_tables_with_default_schema(args, df1, df2):
     #  print stats about input tables
     df1_verdicts_counter = get_counts_string(df1, "Verdict")
     df1_num_verdicts = sum(df1['Verdict'].str.len() > 0)
-    df1_num_high_confidence = collections.Counter(df1['Confidence']).get(HIGH_CONFIDENCE, 0)
-    df1_high_confidence_fraction = df1_num_high_confidence / df1_num_verdicts
+    # only count high confidence on rows that also have a verdict, so the fraction can't exceed 1
+    df1_num_high_confidence = sum(
+        1 for verdict, confidence in zip(df1['Verdict'], df1['Confidence'])
+        if verdict and confidence in HIGH_CONFIDENCE_VALUES)
+    df1_high_confidence_fraction = df1_num_high_confidence / df1_num_verdicts if df1_num_verdicts else 0
 
     df2_verdicts_counter = get_counts_string(df2, "Verdict")
     df2_num_verdicts = sum(df2['Verdict'].str.len() > 0)
-    df2_num_high_confidence = collections.Counter(df2['Confidence']).get(HIGH_CONFIDENCE, 0)
-    df2_high_confidence_fraction = df2_num_high_confidence / df2_num_verdicts
+    df2_num_high_confidence = sum(
+        1 for verdict, confidence in zip(df2['Verdict'], df2['Confidence'])
+        if verdict and confidence in HIGH_CONFIDENCE_VALUES)
+    df2_high_confidence_fraction = df2_num_high_confidence / df2_num_verdicts if df2_num_verdicts else 0
 
     filename_len = max(len(args.table1), len(args.table2))
     print(f"{args.table1:{filename_len}s}:  {df1_num_verdicts} verdicts. {df1_verdicts_counter}. High confidence for {100*df1_high_confidence_fraction:4.1f}% of them")
@@ -242,7 +256,9 @@ def main():
     args, df1, df2 = parse_args()
 
     print("-"*20)
-    if DEFAULT_SCHEMA_COLUMNS.issubset(df1.columns) and DEFAULT_SCHEMA_COLUMNS.issubset(df2.columns):
+    # a custom schema can add fields beyond Verdict/Confidence, so use the generic comparator (which reads
+    # the schema) whenever one is provided - otherwise custom fields would be silently excluded
+    if not args.form_schema_json and DEFAULT_SCHEMA_COLUMNS.issubset(df1.columns) and DEFAULT_SCHEMA_COLUMNS.issubset(df2.columns):
         df_joined = compare_tables_with_default_schema(args, df1, df2)
     else:
         df_joined = compare_tables_with_generic_schema(args, df1, df2)

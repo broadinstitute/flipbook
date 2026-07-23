@@ -1,6 +1,6 @@
 import os
 
-from flask import request, Response
+from flask import has_request_context, request, Response
 from flipbook import args, RELATIVE_DIRECTORY_TO_DATA_FILES_LIST, FORM_RESPONSES, FORM_SCHEMA_COLUMNS, \
     RELATIVE_DIRECTORY_TO_METADATA, METADATA_COLUMNS, EXTRA_DATA_IN_FORM_RESPONSES_TABLE, \
     EXTRA_COLUMNS_IN_FORM_RESPONSES_TABLE, get_static_data_page_url, MAIN_PAGE_HEADER_FILENAME
@@ -14,7 +14,7 @@ def main_list_handler(is_static_website=False):
     if MAIN_LIST_TEMPLATE is None or args.dev_mode:
         MAIN_LIST_TEMPLATE = load_jinja_template("main_list")
 
-    if args.verbose:
+    if args.verbose and has_request_context():
         print(f"main_list_handler received {request.url}")
 
     data_files_list = [

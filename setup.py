@@ -25,7 +25,6 @@ install_requires = [
     "requests>=2.31.0",
     "wcmatch>=8.4.1",
     "xlrd>=2.0.1",
-    "xlwt>=1.3.0",
 
     # NOTE: there is a "KeyError: 'WERKZEUG_SERVER_FD'" in the latest versions of Werkzeug
     # when starting the server, so use a previous version of flask and Werkzeug
@@ -58,7 +57,7 @@ setup(
         'static/*/*/*/*/*/*.*',
         'templates/*.*',
     ]},
-    python_requires=">=3.7",
+    python_requires=">=3.8",
     license="MIT",
     keywords='curation, NGS, sequencing, STRs, REviewer, read visualization, machine learning',
     url='https://github.com/broadinstitute/flipbook',
@@ -68,7 +67,6 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: Implementation :: CPython',

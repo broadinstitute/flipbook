@@ -1,7 +1,7 @@
 import collections
 import configargparse
 import gzip
-from flask import Flask, Response, send_from_directory
+from flask import Flask, Response, request, send_from_directory, send_file as flask_send_file
 from flask_cors import CORS
 import jinja2
 import json
@@ -37,7 +37,7 @@ p.add_argument("-i", "--include", action="append", help="Only include files whos
 p.add_argument("-x", "--exclude", action="append", help="Skip files whose path contains this keyword. If both "
                " --include and --exclude are specified, --exclude takes precedence over --include", default=[WEBSITE_DIR])
 p.add_argument("-t", "--form-responses-table", default="flipbook_form_responses.tsv",
-               help="The .tsv or .xls path where form responses are saved. If the file already exists,"
+               help="The .tsv or .xlsx path where form responses are saved. If the file already exists,"
                     "it will be parsed for previous form responses and then updated as the user fills in the form(s)."
                     "If the file doesn't exist, it will be created after the 1st form response.")
 p.add_argument("-m", "--metadata-table", default="flipbook_metadata.tsv",
@@ -81,8 +81,7 @@ p.add_argument("--dev-mode", action="store_true", env_var="DEV", help="Run serve
 p.add_argument("--image-list", help="A text file of local or remote image file paths. If this is provided, the "
                "directory argument is ignored.")
 p.add_argument("directory", default=".", nargs="?",
-               help="Top-level directory to search for images and data files, or a text file containing the "
-                    "the local paths, HTTP urls or gs:// paths of images.")
+               help="Top-level directory to search for images and data files")
 args = p.parse_args()
 
 if args.verbose > 1:
@@ -91,12 +90,9 @@ if args.verbose > 1:
 if args.image_list:
     if not os.path.isfile(args.image_list):
         p.error(f"{args.image_list} not found")
-
-    with open(args.image_list, "rt") as f:
-        lines = f.readlines()
-
-    image_paths = [l.strip() for l in lines if l.strip()]
-    print(f"Parsed {len(image_paths)} image paths from {args.image_list}")
+    if args.generate_static_website:
+        p.error("--generate-static-website is not supported together with --image-list, since image list entries "
+                "can be remote urls or paths outside the current directory which can't be copied into the static website")
 else:
     if not os.path.isdir(args.directory):
         p.error(f"{args.directory} directory not found")
@@ -109,7 +105,8 @@ def parse_table(path):
 
     try:
         if is_excel_table(path):
-            df = pd.read_excel(path, engine="openpyxl")
+            # openpyxl only reads .xlsx; legacy .xls requires the xlrd engine
+            df = pd.read_excel(path, engine="xlrd" if path.endswith(".xls") else "openpyxl")
         else:
             df = pd.read_table(path)
     except Exception as e:
@@ -147,6 +144,15 @@ else:
 
 if not RELATIVE_DIRECTORY_TO_DATA_FILES_LIST:
     p.error(f"No images or data files found in {args.directory}")
+
+# in --image-list mode, local paths can be absolute or outside args.directory, so they are served through
+# the /il route, which only accepts paths that appear in the image list
+IMAGE_LIST_LOCAL_PATHS = set()
+if args.image_list:
+    for _, data_files in RELATIVE_DIRECTORY_TO_DATA_FILES_LIST:
+        for _, data_file_path in data_files:
+            if not data_file_path.startswith(("http://", "https://", "gs://")):
+                IMAGE_LIST_LOCAL_PATHS.add(data_file_path)
 
 
 # parse metadata from flipbook_metadata.json files
@@ -207,9 +213,6 @@ FORM_SCHEMA = [
     }
 ]
 
-if args.generate_static_website:
-    FORM_SCHEMA = {}
-
 if args.form_schema_json:
     print(f"Loading form schema from {args.form_schema_json}")
     try:
@@ -232,6 +235,10 @@ if args.form_schema_json:
     except Exception as e:
         p.error(f"Couldn't parse {args.form_schema_json}: {e}")
 
+# static websites can't save form responses, so don't render the forms. This must happen after the
+# --form-schema-json handling above so a custom schema doesn't re-enable the forms.
+if args.generate_static_website:
+    FORM_SCHEMA = {}
 
 FORM_SCHEMA_COLUMNS = [r['columnName'] for r in FORM_SCHEMA]
 
@@ -285,6 +292,9 @@ EXTRA_DATA_IN_FORM_RESPONSES_TABLE = {}
 if FORM_SCHEMA:
     args.form_responses_table = os.path.join(args.directory, args.form_responses_table)
     args.form_responses_table_is_excel = is_excel_table(args.form_responses_table)
+    if args.form_responses_table.endswith(".xls"):
+        p.error(f"pandas can no longer write legacy .xls files. Please use a .xlsx or .tsv path for "
+                f"--form-responses-table instead of {args.form_responses_table}")
 
     if os.path.isfile(args.form_responses_table):
         try:
@@ -341,49 +351,53 @@ if args.sort_by:
         sort_key = []
         for s in args.sort_by:
             if s == PATH_COLUMN:
-                sort_key.append(relative_dir)
-                continue
-            form_value = FORM_RESPONSES.get(relative_dir, {}).get(s)
-            if form_value is not None:
-                sort_key.append(form_value)
-                continue
-            metadata_value = RELATIVE_DIRECTORY_TO_METADATA.get(relative_dir, {}).get(s)
-            if metadata_value is not None:
-                sort_key.append(metadata_value)
-                continue
+                value = relative_dir
+            else:
+                # blank cells arrive as '' after parse_table's fillna(''), so treat them as missing
+                value = FORM_RESPONSES.get(relative_dir, {}).get(s)
+                if value is None or value == "":
+                    value = RELATIVE_DIRECTORY_TO_METADATA.get(relative_dir, {}).get(s)
+                if value == "":
+                    value = None
+
+            # use (is_missing, value) pairs so entries missing a value sort last, and so tuple
+            # positions always line up with args.sort_by even when some values are missing
+            sort_key.append((value is None, value))
 
         return tuple(sort_key)
 
-    sort_key_data_types = []
+    sort_key_data_types = [None] * len(args.sort_by)
     for entry in RELATIVE_DIRECTORY_TO_DATA_FILES_LIST:
-        current_sort_key_data_types = tuple([type(v).__name__ for v in get_sort_key(entry)])
-        if not sort_key_data_types:
-            sort_key_data_types = current_sort_key_data_types
-        elif len(sort_key_data_types) == len(current_sort_key_data_types) and sort_key_data_types != current_sort_key_data_types:
-            sort_key_summary1 = [f'{v} ({t})' for v, t in zip(args.sort_by, sort_key_data_types)]
-            sort_key_summary2 = [f'{v} ({t})' for v, t in zip(args.sort_by, current_sort_key_data_types)]
-            p.error(f"Data types of sort columns must be consistent, but they've changed from [{', '.join(sort_key_summary1)}] to [{', '.join(sort_key_summary2)}]")
-        elif len(current_sort_key_data_types) == 0:
+        sort_key = get_sort_key(entry)
+        if all(is_missing for is_missing, _ in sort_key):
             p.error(f"No sort column value(s) found ({', '.join(args.sort_by)}) for {entry[0]}")
+        for i, (is_missing, value) in enumerate(sort_key):
+            if is_missing:
+                continue
+            type_name = type(value).__name__
+            if sort_key_data_types[i] is None:
+                sort_key_data_types[i] = type_name
+            elif sort_key_data_types[i] != type_name:
+                p.error(f"Data types within the '{args.sort_by[i]}' sort column must be consistent, but it contains "
+                        f"both {sort_key_data_types[i]} and {type_name} values")
 
-    if len(sort_key_data_types) < len(args.sort_by):
-        p.error(f"Found only {len(sort_key_data_types)} out of {len(args.sort_by)} sort columns")
+    missing_columns = [s for s, t in zip(args.sort_by, sort_key_data_types) if t is None]
+    if missing_columns:
+        p.error(f"No values found for sort column(s): {', '.join(missing_columns)}")
 
     sort_key_summary = [f'{v} ({t})' for v, t in zip(args.sort_by, sort_key_data_types)]
     print(f"Sorting {len(RELATIVE_DIRECTORY_TO_DATA_FILES_LIST)} pages by {', '.join(sort_key_summary)}")
-    RELATIVE_DIRECTORY_TO_DATA_FILES_LIST = sorted(RELATIVE_DIRECTORY_TO_DATA_FILES_LIST, key=get_sort_key, reverse=args.reverse_sort)
+    # flip the is_missing flags when reverse-sorting so that missing values still sort last after the reversal
+    RELATIVE_DIRECTORY_TO_DATA_FILES_LIST = sorted(
+        RELATIVE_DIRECTORY_TO_DATA_FILES_LIST,
+        key=lambda entry: tuple((is_missing != args.reverse_sort, value) for is_missing, value in get_sort_key(entry)),
+        reverse=args.reverse_sort)
     #for entry in RELATIVE_DIRECTORY_TO_DATA_FILES_LIST:
     #    print(get_sort_key(entry))
 
 
 def send_file(path):
     print(f"Sending {args.directory} {path}")
-    if path.startswith("/static/"):
-        mimetype = None
-        if path.endswith(".png"):
-            mimetype="image/png"
-        return Response(pkg_resources.resource_stream('flipbook', path), mimetype=mimetype)
-
     if path.endswith(".svg.gz"):
         # serve gzipped SVGs with a Content-Encoding header so the browser decompresses and renders them
         response = send_from_directory(args.directory, path, mimetype="image/svg+xml")
@@ -391,6 +405,21 @@ def send_file(path):
         return response
 
     return send_from_directory(args.directory, path, as_attachment=True)
+
+
+def send_image_list_file():
+    path = request.args.get("p", "")
+    if path not in IMAGE_LIST_LOCAL_PATHS:
+        return Response(f"{path} is not one of the paths in {args.image_list}", status=404, mimetype="text/plain")
+
+    absolute_path = os.path.abspath(os.path.join(args.directory, path))
+    print(f"Sending {absolute_path}")
+    mimetype, encoding = mimetypes.guess_type(absolute_path)
+    response = flask_send_file(absolute_path, mimetype=mimetype)
+    if encoding:
+        # for gzip-compressed images (eg. .svg.gz), let the browser decompress
+        response.headers["Content-Encoding"] = encoding
+    return response
 
 
 def send_gs_file(gs_path):
@@ -413,13 +442,16 @@ def get_static_data_page_url(page_number, last):
         raise ValueError(f"page_number arg is out of bounds. It must be between 1 and {len(RELATIVE_DIRECTORY_TO_DATA_FILES_LIST)}")
 
     relative_dir, _ = RELATIVE_DIRECTORY_TO_DATA_FILES_LIST[i]
+    # include the page number since replacing "/" with "__" isn't collision-free (eg. "a/b" vs "a__b")
     name = relative_dir.replace("/", "__")
-    return f"page_{name}.html"
+    return f"page{page_number}_{name}.html"
 
 
 def main():
     # add a ctime(..) function to allow the last-changed-time of a path to be computed within a jinja template
-    jinja2.environment.DEFAULT_FILTERS['ctime'] = lambda path: int(os.path.getctime(path)) if os.path.isfile(path) else 0
+    # resolve relative to args.directory since the server process cwd can be a different directory
+    jinja2.environment.DEFAULT_FILTERS['ctime'] = lambda path: int(os.path.getctime(os.path.join(args.directory, path))) \
+        if os.path.isfile(os.path.join(args.directory, path)) else 0
 
     from flipbook.main_list import main_list_handler
     from flipbook.data_page import data_page_handler
@@ -439,25 +471,27 @@ def main():
         flipbook_package_dir = sys.modules['flipbook'].__path__[0]
         static_dir = os.path.join(flipbook_package_dir, "static")
         print("Copying", static_dir)
-        shutil.copytree(static_dir, os.path.join(WEBSITE_DIR, "static"))
+        shutil.copytree(static_dir, os.path.join(WEBSITE_DIR, "static"), dirs_exist_ok=True)
 
         last_page_number = len(RELATIVE_DIRECTORY_TO_DATA_FILES_LIST)
         for i, (relative_directory, data_file_types_and_paths) in enumerate(RELATIVE_DIRECTORY_TO_DATA_FILES_LIST):
             page_number = i + 1
             with app.test_request_context(get_data_page_url(page_number, last_page_number)):
-                page_dir = os.path.join(WEBSITE_DIR, relative_directory)
-                os.makedirs(page_dir, exist_ok=True)
                 for data_file_type, data_file in data_file_types_and_paths:
                     if data_file_type in (METADATA_JSON_FILE_TYPE, CONTENT_HTML_FILE_TYPE):
                         continue
-                    print("Copying", data_file_type, data_file, "to", page_dir)
+                    # copy to the same relative path under WEBSITE_DIR so the generated page's image links
+                    # resolve correctly for both top-level and subdirectory images
+                    destination_path = os.path.join(WEBSITE_DIR, data_file)
+                    os.makedirs(os.path.dirname(destination_path), exist_ok=True)
+                    print("Copying", data_file_type, data_file, "to", destination_path)
                     if data_file.endswith(".svg.gz"):
                         # decompress since static web hosts may not serve .svg.gz files with a gzip Content-Encoding header
                         with gzip.open(data_file, "rb") as fin:
-                            with open(os.path.join(page_dir, os.path.basename(data_file)[:-len(".gz")]), "wb") as fout:
+                            with open(destination_path[:-len(".gz")], "wb") as fout:
                                 shutil.copyfileobj(fin, fout)
                     else:
-                        shutil.copy(data_file, page_dir)
+                        shutil.copy(data_file, destination_path)
 
                 with open(os.path.join(WEBSITE_DIR, get_static_data_page_url(page_number, last_page_number)), "wt") as f:
                     f.write(data_page_handler(is_static_website=True).get_data(as_text=True))
@@ -474,6 +508,7 @@ def main():
     app.add_url_rule('/page', view_func=data_page_handler, methods=['POST', 'GET'])
     app.add_url_rule('/save', view_func=save_form_handler, methods=['POST'])
     app.add_url_rule('/gs/<path:gs_path>', view_func=send_gs_file, methods=['GET'])
+    app.add_url_rule('/il', view_func=send_image_list_file, methods=['GET'])
     app.add_url_rule('/<path:path>', view_func=send_file, methods=['GET'])
 
     host = os.environ.get('HOST', args.host)

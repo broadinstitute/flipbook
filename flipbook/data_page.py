@@ -132,6 +132,7 @@ def data_page_handler(is_static_website=False):
         zoom=args.zoom,
         scroll_to_image=args.scroll_to_image,
         autosave_form=args.autosave_form,
+        image_list_mode=bool(args.image_list),
     )
 
     return Response(html, mimetype='text/html')
