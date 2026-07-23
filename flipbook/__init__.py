@@ -25,6 +25,29 @@ WEBSITE_DIR = "flipbook_html"
 MAIN_PAGE_HEADER_FILENAME = "flipbook_main_page_header.html"
 DATA_PAGE_HEADER_FILENAME = "flipbook_data_page_header.html"
 
+
+def warn_about_unmatched_paths(table_path, path_column_values, relative_directory_to_data_files_list, top_level_dir):
+    """Print a warning about table rows whose PATH_COLUMN value doesn't match any of the image files found on disk.
+
+    Such rows are silently ignored everywhere else, so this warning is usually the first sign that the table was
+    generated using filenames that differ from the actual ones (eg. ".svg" instead of ".svg.gz").
+
+    Args:
+        table_path (str): Path of the metadata or form responses table. Used in the warning message.
+        path_column_values (iterable): The PATH_COLUMN values from that table.
+        relative_directory_to_data_files_list (list): (relative_dir, data_files) tuples for the images found on disk.
+        top_level_dir (str): Directory that was searched for images. Used in the warning message.
+    """
+    path_column_values = set(path_column_values)
+    data_file_paths = {relative_dir for relative_dir, _ in relative_directory_to_data_files_list}
+    unmatched = path_column_values - data_file_paths
+    if not unmatched:
+        return
+
+    print(f"WARNING: {len(unmatched):,d} of the {len(path_column_values):,d} '{PATH_COLUMN}' values in {table_path} "
+          f"don't match any of the {len(data_file_paths):,d} image paths found in {top_level_dir}, so these rows "
+          f"will be ignored. Examples: " + ", ".join(sorted(unmatched)[:3]))
+
 p = configargparse.ArgumentParser(
     formatter_class=configargparse.DefaultsFormatter,
     add_config_file_help=True,
@@ -185,6 +208,9 @@ if args.metadata_table and os.path.isfile(args.metadata_table):
             if key not in METADATA_COLUMNS:
                 METADATA_COLUMNS.append(key)
 
+    warn_about_unmatched_paths(
+        args.metadata_table, df.index, RELATIVE_DIRECTORY_TO_DATA_FILES_LIST, args.directory)
+
 # define input form fields to show on each data page
 FORM_SCHEMA = [
     {
@@ -302,6 +328,9 @@ if FORM_SCHEMA:
         except ValueError as e:
             p.error(str(e))
         EXTRA_COLUMNS_IN_FORM_RESPONSES_TABLE = [c for c in df.columns if c not in FORM_SCHEMA_COLUMNS and c != PATH_COLUMN]
+
+        warn_about_unmatched_paths(
+            args.form_responses_table, df.index, RELATIVE_DIRECTORY_TO_DATA_FILES_LIST, args.directory)
     else:
         # make sure the table can be written out later
         if not os.access(os.path.dirname(args.form_responses_table), os.W_OK):
@@ -370,7 +399,11 @@ if args.sort_by:
     for entry in RELATIVE_DIRECTORY_TO_DATA_FILES_LIST:
         sort_key = get_sort_key(entry)
         if all(is_missing for is_missing, _ in sort_key):
-            p.error(f"No sort column value(s) found ({', '.join(args.sort_by)}) for {entry[0]}")
+            if entry[0] in RELATIVE_DIRECTORY_TO_METADATA or entry[0] in FORM_RESPONSES:
+                p.error(f"{entry[0]} has blank values in all --sort-by columns: {', '.join(args.sort_by)}")
+            p.error(f"No metadata row found for {entry[0]}, so it has no values for the --sort-by column(s): "
+                    f"{', '.join(args.sort_by)}. Check that the '{PATH_COLUMN}' values in the metadata table exactly "
+                    f"match the image file paths found in {args.directory}")
         for i, (is_missing, value) in enumerate(sort_key):
             if is_missing:
                 continue
