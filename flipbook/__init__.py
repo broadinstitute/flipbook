@@ -5,6 +5,7 @@ from flask import Flask, Response, send_from_directory
 from flask_cors import CORS
 import jinja2
 import json
+import mimetypes
 import os
 import pandas as pd
 import pkg_resources
@@ -12,9 +13,11 @@ import pkgutil
 import re
 import requests
 import shutil
+import subprocess
 import sys
 
-from flipbook.utils import get_relative_directory_to_data_files_list, get_relative_directory_to_metadata, \
+from flipbook.utils import get_relative_directory_to_data_files_list, \
+    get_relative_directory_to_data_files_from_image_list, get_relative_directory_to_metadata, \
     is_excel_table, get_data_page_url, METADATA_JSON_FILE_TYPE, CONTENT_HTML_FILE_TYPE
 
 PATH_COLUMN = 'Path'
@@ -390,6 +393,20 @@ def send_file(path):
     return send_from_directory(args.directory, path, as_attachment=True)
 
 
+def send_gs_file(gs_path):
+    print(f"Sending gs://{gs_path}")
+    result = subprocess.run(["gsutil", "cat", f"gs://{gs_path}"], capture_output=True)
+    if result.returncode != 0:
+        return Response(result.stderr, status=404, mimetype="text/plain")
+
+    mimetype, encoding = mimetypes.guess_type(gs_path)
+    response = Response(result.stdout, mimetype=mimetype)
+    if encoding:
+        # for gzip-compressed images (eg. .svg.gz), let the browser decompress
+        response.headers["Content-Encoding"] = encoding
+    return response
+
+
 def get_static_data_page_url(page_number, last):
     i = page_number - 1
     if i < 0 or i >= len(RELATIVE_DIRECTORY_TO_DATA_FILES_LIST):
@@ -456,6 +473,7 @@ def main():
     app.add_url_rule('/', view_func=main_list_handler, methods=['GET'])
     app.add_url_rule('/page', view_func=data_page_handler, methods=['POST', 'GET'])
     app.add_url_rule('/save', view_func=save_form_handler, methods=['POST'])
+    app.add_url_rule('/gs/<path:gs_path>', view_func=send_gs_file, methods=['GET'])
     app.add_url_rule('/<path:path>', view_func=send_file, methods=['GET'])
 
     host = os.environ.get('HOST', args.host)

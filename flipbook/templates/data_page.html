@@ -173,8 +173,14 @@
                         {% endif %}
                     </div>
 
+                    {# gs:// paths can't be loaded directly by the browser, so they're proxied through the /gs/ route #}
+                    {% if image_file_path.startswith("gs://") %}
+                        {% set image_src = "/gs/" + image_file_path[5:] %}
+                    {% else %}
+                        {% set image_src = image_file_path + "?cache=" + (image_file_path | ctime | string) %}
+                    {% endif %}
                     <img class="img-default-view"
-                         src="{{ image_file_path }}?cache={{ image_file_path | ctime}}"
+                         src="{{ image_src }}"
                          tabindex="{{ tabindex.value }}"
                     />
                     {% set tabindex.value = tabindex.value + 1 %}

@@ -94,6 +94,7 @@ python3 -m flipbook --generate-static-website
   Instead of crawling a directory for images, you can provide a text file containing a list of image paths (one per line).
   This is useful when you want to review a specific subset of images or images from multiple locations.
   The file can contain local paths, HTTP URLs, or gs:// paths. Gzip-compressed files (`.gz`) are also supported.
+  gs:// paths are downloaded via `gsutil`, which must be installed and authenticated.
   When using `--image-list`, the directory argument is ignored.
 
 - config file (`~/.flipbook_config`)
